@@ -1,0 +1,6 @@
+[submodule "public/tradingview"]
+	path = public/tradingview
+	url = git@github.com:sotatek-dev/tradingview.git
+[submodule "resources/lang"]
+	path = resources/lang
+	url = git@github.com:sotatek-dev/mango-exchange-locales.git

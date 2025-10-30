@@ -1,0 +1,1 @@
+php artisan session_check_ready:process

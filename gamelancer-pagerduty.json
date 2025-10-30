@@ -1,0 +1,9 @@
+{
+  "apps": [
+    {
+      "name": "gamelancer-pagerduty",
+      "script": "php /var/www/gamelancer-api/artisan queue:work --daemon --tries=5 --queue=pager_duty",
+      "node_args": ""
+    }
+  ]
+}

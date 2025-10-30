@@ -1,0 +1,88 @@
+@import "../../../sass/_variables";
+table {
+  width: 100%;
+  background-color: $color_white;
+  // border: $border_thin;
+  overflow-y: hidden;
+  thead {
+    color: $color_grey;
+    background-color: $color_white;
+    border: none;
+    overflow: hidden;
+    th {
+      position: relative;
+      background-color: $color_white;
+      line-height: 15px;
+      font-size: $font_root;
+      font-weight: 500;
+      color: $color_grey;
+      padding: 5px 15px;
+      border-bottom: 1px solid $color_alto;
+      height: 40px;
+      user-select: none;
+      &::after{
+        font-family: "icomoon" !important;
+        font-size: $font_root;
+        width: 14px;
+        height: 14px;
+        line-height: 14px;
+        overflow: hidden;
+        position: relative;
+        content: "";
+        }
+      &[data-sort-order=asc] {
+        color: $color_corn_pale;
+        &::after{
+          content: "\e955";
+        }
+      }
+      &[data-sort-order=desc] {
+        color: $color_corn_pale;
+        &::after{
+          content: "\e956";
+        }
+      }
+      &[data-sort-field] {
+        cursor: pointer;
+      }
+    }
+
+  }
+  tbody {
+    tr {
+      vertical-align: top;
+      overflow-y: hidden;
+      transition-property: height;
+      transition-duration: 0.3s, 0.3s;
+      transition-timing-function: ease, ease-in;
+      height: auto;
+      background-color: $color_white;
+      border-bottom: 1px solid $color_catskill_white;
+      &:hover {
+        background-color: $color_champagne;
+      }
+      &.active {
+        height: 100px;
+        max-height: 300px;
+        background-color: $color_grey_select;
+        transition-property: height;
+        transition-duration: 0.3s, 0.3s;
+        transition-timing-function: ease, ease-in;
+        .glyphicon-menu-down {
+          transition-duration: 0.5s;
+          transform: rotate(180deg);
+        }
+      }
+    }
+    td {
+      height: 40px;
+      overflow: initial;
+      line-height: 23px;
+      font-size: $font_root;
+      font-weight: 500;
+      color: $color_mine_shaft;
+      padding: 8px 15px 4px 15px;
+      border-top: 1px solid $color_catskill_white;
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "apps": [
+    {
+      "name": "gamelancer-default-jobs",
+      "script": "php /var/www/gamelancer-api/artisan queue:work --daemon --tries=5 --queue=default",
+      "node_args": ""
+    },
+    {
+      "name": "gamelancer-firehose-jobs",
+      "script": "php /var/www/gamelancer-api/artisan queue:work --daemon --tries=5 --queue=put_firehose",
+      "node_args": ""
+    },
+    {
+      "name": "gamelancer-mattermost-jobs",
+      "script": "php /var/www/gamelancer-api/artisan queue:work --daemon --tries=5 --queue=create_mattermost_user",
+      "node_args": ""
+    },
+    {
+      "name": "gamelancer-statistic-jobs",
+      "script": "php /var/www/gamelancer-api/artisan queue:work --daemon --tries=5 --queue=statistic",
+      "node_args": ""
+    },
+    {
+      "name": "gamelancer-notification-jobs",
+      "script": "php /var/www/gamelancer-api/artisan queue:work --daemon --tries=5 --queue=notification",
+      "node_args": ""
+    },
+    {
+      "name": "gamelancer-voice-group-jobs",
+      "script": "php /var/www/gamelancer-api/artisan queue:work --daemon --tries=5 --queue=voice_group",
+      "node_args": ""
+    },
+    {
+      "name": "gamelancer-community-jobs",
+      "script": "php /var/www/gamelancer-api/artisan queue:work --daemon --tries=5 --queue=community",
+      "node_args": ""
+    }
+    // {
+    //   "name": "gamelancer-ranking-jobs",
+    //   "script": "php /var/www/gamelancer-api/artisan queue:work --daemon --tries=5 --queue=ranking",
+    //   "node_args": ""
+    // }
+  ]
+}

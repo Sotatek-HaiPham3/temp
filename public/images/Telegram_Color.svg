@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="37px" height="37px" viewBox="0 0 37 37" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>F91C64FC-C80E-4122-8C2C-AD1C9FC9DA53_Color</title>
+    <defs>
+        <linearGradient x1="66.67%" y1="16.67%" x2="41.67%" y2="75%" id="linearGradient-1">
+            <stop stop-color="#37AEE2" offset="0%"></stop>
+            <stop stop-color="#1E96C8" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="61.2346759%" y1="45.5610016%" x2="74.7064382%" y2="71.2734252%" id="linearGradient-2">
+            <stop stop-color="#EFF7FC" offset="0%"></stop>
+            <stop stop-color="#FFFFFF" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="👩🏻‍🎤-View-Bounty-/-Gamelancer" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="MB---Bounty-Screen-Share" transform="translate(-34.000000, -553.000000)">
+            <g id="Group" transform="translate(34.000000, 553.000000)">
+                <g id="Telegram">
+                    <circle id="Oval" fill="url(#linearGradient-1)" cx="18.375" cy="18.375" r="18.375"></circle>
+                    <path d="M15.00625,26.796875 C14.4109612,26.796875 14.5121156,26.5721028 14.3068056,26.0052953 L12.55625,20.2440284 L26.03125,12.25" id="Shape" fill="#C8DAEA"></path>
+                    <path d="M15.00625,26.796875 C15.465625,26.796875 15.6685922,26.5867875 15.925,26.3375 L18.375,23.9551813 L15.3189312,22.1123219" id="Shape" fill="#A9C9DD"></path>
+                    <path d="M15.318625,22.1127813 L22.72375,27.5837844 C23.5687703,28.0500347 24.1786519,27.8086331 24.3891375,26.7992484 L27.4034031,12.5949141 C27.7120113,11.3576334 26.9317628,10.7964609 26.12337,11.1634709 L8.42365125,17.9884053 C7.21547969,18.473 7.22252344,19.1470409 8.20342688,19.4473803 L12.7455738,20.8650575 L23.2611269,14.2309169 C23.7575428,13.9298884 24.2131509,14.0917278 23.8392044,14.4236094" id="Shape" fill="url(#linearGradient-2)"></path>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

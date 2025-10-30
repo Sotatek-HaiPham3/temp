@@ -1,0 +1,7 @@
+#!/usr/bin/expect
+cd /root/gamelancer
+spawn php artisan migrate
+expect "Do you really wish to run this command"
+send "yes\r"
+expect eof
+wait

@@ -1,0 +1,47 @@
+version: '3'
+services:
+  api:
+    container_name: gamelancer-api
+    build: ./docker
+    ports:
+     - "8800:80"
+    volumes:
+     - .:/var/www/gamelancer-api
+    extra_hosts:
+     - "host.docker.internal:host-gateway"
+    links:
+     - redis
+     - db
+  redis:
+    container_name: gamelancer-redis
+    image: "redis:alpine"
+    ports:
+      - "8879:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+  echo-server:
+    container_name: gamelancer-echo-server
+    image: "lagun4ik/laravel-echo-server"
+    ports:
+      - "8801:6001"
+    volumes:
+      - .:/app
+    links:
+      - redis
+      - api
+  db:
+    image: "mariadb:10.1.30"
+    container_name: gamelancer-mariadb
+    environment:
+      MARIADB_ROOT_PASSWORD: gamelancer
+      MYSQL_ROOT_PASSWORD: 1
+      MYSQL_DATABASE: gamelancer
+    ports:
+      - "8806:3306"
+    volumes:
+      - mariadb-data:/var/lib/mysql
+
+volumes:
+  redis-data:
+  mariadb-data:

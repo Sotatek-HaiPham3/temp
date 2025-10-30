@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="176px" height="174px" viewBox="0 0 176 174" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: sketchtool 57.1 (101010) - https://sketch.com -->
+    <title>B5C8F3E5-7C7C-4B4A-A0D6-E8A06EB4CBF5</title>
+    <desc>Created with sketchtool.</desc>
+    <defs>
+        <filter x="-26.3%" y="-63.9%" width="152.5%" height="227.8%" filterUnits="objectBoundingBox" id="filter-1">
+            <feOffset dx="0" dy="20" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="20" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.103611233 0" type="matrix" in="shadowBlurOuter1" result="shadowMatrixOuter1"></feColorMatrix>
+            <feMerge>
+                <feMergeNode in="shadowMatrixOuter1"></feMergeNode>
+                <feMergeNode in="SourceGraphic"></feMergeNode>
+            </feMerge>
+        </filter>
+    </defs>
+    <g id="Desktop-UI" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" opacity="0.119731">
+        <g id="D---Bounty-List" transform="translate(-1001.000000, -323.000000)" fill="#FFFFFF" fill-rule="nonzero">
+            <g id="TCTD2_screen_e3_BE3_180610NoLogo_1528652728-1480x833" filter="url(#filter-1)" transform="translate(741.000000, 300.000000)">
+                <g id="earn" transform="translate(294.000000, 36.000000)">
+                    <path d="M54,0 C83.7771429,0 108,24.2228571 108,54 C108,83.7771429 83.7771429,108 54,108 C24.2228571,108 0,83.7771429 0,54 C0,24.2228571 24.2228571,0 54,0 Z M54,7.71428571 C28.4772857,7.71428571 7.71428571,28.4772857 7.71428571,54 C7.71428571,79.5227143 28.4772857,100.285714 54,100.285714 C79.5227143,100.285714 100.285714,79.5227143 100.285714,54 C100.285714,28.4772857 79.5227143,7.71428571 54,7.71428571 Z M58.1538462,19.7307692 L58.153,27 L73.7307692,27 L73.7307692,34.7142857 L58.153,34.714 L58.153,50.142 L62.2038462,50.1428571 C68.5590231,50.1428571 73.7307692,55.3345714 73.7307692,61.7142857 L73.7307692,69.4285714 C73.7307692,75.8082857 68.5590231,81 62.2038462,81 L58.153,81 L58.1538462,89.3076923 L50.8846154,89.3076923 L50.884,81 L35.3076923,81 L35.3076923,73.2857143 L50.884,73.285 L50.884,57.857 L46.8346154,57.8571429 C40.4794385,57.8571429 35.3076923,52.6654286 35.3076923,46.2857143 L35.3076923,38.5714286 C35.3076923,32.1917143 40.4794385,27 46.8346154,27 L50.884,27 L50.8846154,19.7307692 L58.1538462,19.7307692 Z M58.153,73.285 L62.2038462,73.2857143 C64.3248,73.2857143 66.0461538,71.5577143 66.0461538,69.4285714 L66.0461538,61.7142857 C66.0461538,59.5851429 64.3248,57.8571429 62.2038462,57.8571429 L58.153,57.857 L58.153,73.285 Z M50.884,50.142 L50.884,34.714 L46.8346154,34.7142857 C44.7136615,34.7142857 42.9923077,36.4422857 42.9923077,38.5714286 L42.9923077,46.2857143 C42.9923077,48.4148571 44.7136615,50.1428571 46.8346154,50.1428571 L50.884,50.142 Z" id="Combined-Shape"></path>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

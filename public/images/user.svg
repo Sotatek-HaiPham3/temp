@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="15px" height="17px" viewBox="0 0 15 17" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: sketchtool 55 (78076) - https://sketchapp.com -->
+    <title>D38807B2-A20E-470F-A2D6-A119FCD041EE</title>
+    <desc>Created with sketchtool.</desc>
+    <g id="Design" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round">
+        <g id="D---Log-In" transform="translate(-1148.000000, -22.000000)" stroke="#32FCC6" stroke-width="2">
+            <g id="Header">
+                <g id="Logo">
+                    <g transform="translate(571.000000, 10.000000)">
+                        <g id="Button-/-Icon" transform="translate(495.000000, 0.000000)">
+                            <g id="icon-/-plus">
+                                <g transform="translate(80.000000, 11.000000)">
+                                    <g id="user" transform="translate(3.000000, 2.000000)">
+                                        <path d="M6.33333333,6.33333333 C4.58443163,6.33333333 3.16666667,4.91556837 3.16666667,3.16666667 C3.16666667,1.41776496 4.58443163,0 6.33333333,0 C8.08223504,0 9.5,1.41776496 9.5,3.16666667 C9.5,4.91556837 8.08223504,6.33333333 6.33333333,6.33333333 Z M12.6666667,14.25 L0,14.25 L0,12.6666667 C0,10.917765 1.41776496,9.5 3.16666667,9.5 L9.5,9.5 C11.2489017,9.5 12.6666667,10.917765 12.6666667,12.6666667 L12.6666667,14.25 Z" id="Oval-2"></path>
+                                    </g>
+                                </g>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

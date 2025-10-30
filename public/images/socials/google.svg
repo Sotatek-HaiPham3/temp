@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="64px" height="64px" viewBox="0 0 64 64" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 64 (93537) - https://sketch.com -->
+    <title>Artboard</title>
+    <desc>Created with Sketch.</desc>
+    <g id="Artboard" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Coin-money">
+            <rect id="Rectangle" x="0" y="0" width="64" height="64"></rect>
+            <g id="crosshair-copy" transform="translate(17.000000, 16.000000)" fill="#FFFFFF" fill-rule="nonzero">
+                <path d="M16.5591397,32.0589677 C20.886595,32.0589677 26.141362,30.3593201 29.4531899,28.0334865 L29.4531899,15.6886776 L22.4762725,15.6886776 L22.4762725,23.6054573 C20.6216488,24.5447363 18.6787096,25.0814671 17.13319,25.0814671 C12.0992114,25.0814671 8.30164872,21.1901686 8.30164872,16.0464982 C8.30164872,10.9475554 12.0550538,7.05625694 17.0448746,7.05625694 C19.8709677,7.05625694 23.0061649,8.39808395 25.2140501,10.5002798 L29.8064516,4.77515092 C26.6270968,1.91258668 21.7255914,0.123483871 17.0890323,0.123483871 C7.28602158,0.123483871 0,6.92207432 0,16.0464982 C0,25.1709223 7.10939066,32.0589677 16.5591397,32.0589677 Z" id="G"></path>
+            </g>
+        </g>
+    </g>
+</svg>
