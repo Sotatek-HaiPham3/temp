@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'url' => 'http://172.25.105.46:8065',
+    'url' => env('MATTEERMOST_URL', 'https://mattermost-example.com'),
 
     'team' => [
         'name' => env('MATTERMOST_TEAM_NAME', 'gamelancer'),
