@@ -45,10 +45,10 @@ create-env:
 	sed -i -e "s/REDIS_HOST=redis/REDIS_HOST=127.0.0.1/g" .env
 
 docker-connect: 
-	docker exec -it gamelancer-api bash
+	docker exec -it gamelancer-matching-api bash
 
 init-app:
-	cp .env.example .env #should not auto copy .env.example to .env
+# 	cp .env.example .env
 	composer install
 	php artisan key:generate
 	php artisan passport:keys
@@ -57,9 +57,9 @@ init-app:
 	php artisan storage:link
 
 docker-init:
-	docker exec -it gamelancer-api make init-app
-	rm -rf node_modules #keep it, if want to reinstall, uncomment
-	npm install
+	docker exec -it gamelancer-matching-api make init-app
+# 	rm -rf node_modules
+# 	npm install
 
 init-db-full:
 	make autoload
@@ -67,17 +67,17 @@ init-db-full:
 	php artisan db:seed
 
 docker-init-db-full:
-	docker exec -it gamelancer-api make init-db-full
+	docker exec -it gamelancer-matching-api make init-db-full
 
 fake-users:
 	php artisan fake-users:run
 	php artisan mattermost-user-create
 
 docker-fake-users:
-	docker exec -it gamelancer-api make fake-users
+	docker exec -it gamelancer-matching-api make fake-users
 
 docker-link-storage:
-	docker exec -it gamelancer-api php artisan storage:link
+	docker exec -it gamelancer-matching-api php artisan storage:link
 
 init-db:
 	make autoload
@@ -102,10 +102,10 @@ build:
 	npm run dev
 
 watch:
-	docker exec -it gamelancer-api npm run watch
+	docker exec -it gamelancer-matching-api npm run watch
 
 docker-watch:
-	docker exec -it gamelancer-api make watch
+	docker exec -it gamelancer-matching-api make watch
 
 autoload:
 	composer dump-autoload
@@ -114,14 +114,14 @@ cache:
 	php artisan cache:clear && php artisan view:clear
 
 docker-cache:
-	docker exec gamelancer-api make cache
+	docker exec gamelancer-matching-api make cache
 
 route:
 	php artisan route:list
 
 create-table:
 	# Ex: make create-alter n=create_users_table t=users
-	docker exec -it gamelancer-api php artisan make:migration $(n) --create=$(t)
+	docker exec -it gamelancer-matching-api php artisan make:migration $(n) --create=$(t)
 
 model:
 	php artisan make:model Models/$(n) -m
@@ -130,11 +130,11 @@ create-model:
 	# Ex: make create-model n=Test
 	# Result: app/Models/Test.php
 	#         database/migrations/2018_01_05_102531_create_tests_table.php
-	docker exec -it gamelancer-api php artisan make:model Models/$(n) -m
+	docker exec -it gamelancer-matching-api php artisan make:model Models/$(n) -m
 
 create-alter:
 	# Ex: make create-alter n=add_votes_to_users_table t=users
-	docker exec -it gamelancer-api php artisan make:migration $(n) --table=$(t)
+	docker exec -it gamelancer-matching-api php artisan make:migration $(n) --table=$(t)
 
 deploy:
 	ssh $(u)@$(h) "mkdir -p $(dir)"
@@ -155,23 +155,18 @@ deploy:
 				--exclude public/storage \
 				--exclude .env.example \
 				. $(u)@$(h):$(dir)/
-	ssh $(u)@$(h) "cd /var/www/gamelancer-api && npm run watch"
 
 deploy-dev:
-	make deploy h=192.168.1.206 dir=/var/www/gamelancer-api
+	make deploy h=192.168.1.206 dir=/var/www/gamelancer-matching-api
 
 localization:
-	docker exec -it gamelancer-api php artisan localization:sort
+	docker exec -it gamelancer-matching-api php artisan localization:sort
 
 swagger:
-	docker exec -it gamelancer-api php artisan l5-swagger:generate
-
-fix-undefined-index:
-	# PackageManifest.php expection: "Undefined index: name"
-	composer self-update --1
+	docker exec -it gamelancer-matching-api php artisan l5-swagger:generate
 
 games-generate:
-	docker exec -it gamelancer-api php artisan games:generate
+	docker exec -it gamelancer-matching-api php artisan games:generate
 
 deploy-155:
-	make deploy u=ubuntu h=3.101.43.155 dir=/home/ubuntu/gamelancer-api
+	make deploy u=ubuntu h=3.101.43.155 dir=/home/ubuntu/gamelancer-matching-api

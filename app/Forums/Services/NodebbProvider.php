@@ -3,6 +3,7 @@
 namespace App\Forums\Services;
 
 use Illuminate\Support\ServiceProvider;
+use SevenShores\Hubspot\Factory;
 use App\Forums\Services\Nodebb;
 use App\Models\Setting;
 use App\Consts;

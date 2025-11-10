@@ -9,7 +9,6 @@ class Consts
     const VERIFY_CODE_TIME_LIVE = 1; // check token expired - 1day
     const TRUE = 1;
     const FALSE = 0;
-    const USER_ACCESS_TOKEN_LIMIT = 10;
 
     const PASSWORD_SOCIAL_LENGTH = 20;
 
@@ -22,7 +21,6 @@ class Consts
     const RC_CHECK_SESSION_SCHEDULE_EXPIRED_TIME = 'check_session_schedule_expried_time';
     const RC_CHECK_VOICE_OUTDATED = 'check_voice_outdated';
     const RC_USER_CHANNELS = 'user_channels';
-    const RC_COMMUNITIES = 'communities';
     const RC_USER_FORUMS = 'user_forums';
     const RC_USER_VIDEOS = 'user_videos';
 
@@ -47,9 +45,6 @@ class Consts
 
     const USER_ACTIVE = 'active';
     const USER_INACTIVE = 'inactive';
-    const USER_DELETED = 'deleted';
-
-    const USER_DELETED_USERNAME_PREFIX = 'delete_';
 
     const DEFAULT_LOCALE = 'en';
 
@@ -132,12 +127,19 @@ class Consts
     const MASTERDATA_TABLES = [
         'games',
         'platforms',
+        'banners',
         'languages',
         'settings',
+        'coin_price_settings',
+        'user_levels_meta',
+        'offers',
+        'exchange_offers',
         'social_networks_link',
         'reasons',
-        'room_categories',
-        'gallery'
+        'review_tags',
+        'video_tags',
+        'rankings',
+        'sms_whitelists'
     ];
 
     const SESSION_STATUS_BOOKED          = 'booked';
@@ -218,11 +220,6 @@ class Consts
     const OBJECT_TYPE_BOUNTY = 'bounty';
     const OBJECT_TYPE_VIDEO = 'video';
     const OBJECT_TYPE_TIP = 'tip';
-    const OBJECT_TYPE_ROOM = 'room';
-    const OBJECT_TYPE_USER = 'user';
-    const OBJECT_TYPE_COMMUNITY = 'community';
-    const OBJECT_TYPE_COMMUNITY_MESSAGE = 'community_message';
-    const OBJECT_TYPE_COMMUNITY_NAME_CHANGE = 'community_name_change';
 
     const TRANSACTION_TYPE_TIP  = 'tip';
 
@@ -231,8 +228,6 @@ class Consts
     const REASON_TYPE_DECLINE      = 'decline';
     const REASON_CONTENT_OUTDATED = 'outdated';
     const REASON_CONTENT_BOUNTY_COMPLETED = 'Bounty has completed by another gamelancer.';
-    const REASON_TYPE_REPORT = 'report';
-    const REASON_TYPE_REQUEST = 'request';
 
     const TIP_MEMO_SESSION      = 'Tip For Playing Session';
     const TIP_MEMO_BOUNTY       = 'Tip For Playing Bounty';
@@ -267,9 +262,7 @@ class Consts
         'google',
         'facebook',
         'discord',
-        'apple',
-        'tiktok',
-        'snapchat'
+        'apple'
     ];
 
     const SOCIAL_NETWORKS_LINK = [
@@ -283,6 +276,8 @@ class Consts
     ];
 
     const MATTERMOST_TEAM_ID_KEY = 'mattermost_team_id';
+    const NODEBB_CATEGORY_POST_ID_KEY = 'nodebb_category_post_id';
+    const NODEBB_CATEGORY_VIDEO_ID_KEY = 'nodebb_category_video_id';
 
     const BOUNTY_FEE_KEY = 'bounty_fee';
     const SESSION_FEE_KEY = 'session_fee';
@@ -414,9 +409,6 @@ class Consts
     const NOTIFY_YOUR_NEW_GAME_PROFILE = 'notification.online.your_new_session';
     const NOTIFY_YOUR_NEW_BOUNTY = 'notification.online.your_new_bounty';
     const NOTIFY_NEW_FOLLOW = 'notification.follow.new';
-    const NOTIFY_NEW_FOLLOW_FRIEND = 'notification.follow.new.friend';
-    const NOTIFY_NEW_FOLLOWING = 'notification.following.new';
-    const NOTIFY_NEW_FOLLOWING_FRIEND = 'notification.following.new.friend';
     const NOTIFY_TIP = 'notification.tip';
     const NOTIFY_SEND_TIP = 'notification.send_tip';
     const OTHER_NOTIFY_APP = 'notification.other_nofify';
@@ -494,22 +486,6 @@ class Consts
     const MESSAGE_NOTIFY_TASKING_LEVEL_UP                   = 'notification.tasking.levelup';
     const MESSAGE_NOTIFY_TASKING_RESET_DAILY_CHECKIN        = 'notification.tasking.reset_daily_checkin';
 
-    // For voice room
-    const MESSAGE_NOTIFY_ROOM_CREATED                  = 'notification.room.created';
-    const MESSAGE_NOTIFY_ROOM_INVITATION               = 'notification.room.invitation';
-
-    // For Community
-    const MESSAGE_NOTIFY_COMMUNITY_CREATED = 'notification.community.created';
-    const MESSAGE_NOTIFY_COMMUNITY_INVITATION = 'notification.community.invitation';
-    const MESSAGE_NOTIFY_COMMUNITY_KICKED = 'notification.community.kicked';
-    const MESSAGE_NOTIFY_COMMUNITY_PROMOTED = 'notification.community.promoted';
-    const MESSAGE_NOTIFY_COMMUNITY_DEMOTED = 'notification.community.demoted';
-    const MESSAGE_NOTIFY_COMMUNITY_REQUEST_TO_JOIN = 'notification.community.request.to.join';
-    const MESSAGE_NOTIFY_COMMUNITY_ACCEPT_TO_JOIN = 'notification.community.accept.to.join';
-    const MESSAGE_NOTIFY_COMMUNITY_REJECT_TO_JOIN = 'notification.community.reject.to.join';
-    const MESSAGE_NOTIFY_COMMUNITY_APPROVED_CHANGE_NAME = 'notification.community.approved.change.name';
-    const MESSAGE_NOTIFY_COMMUNITY_REJECT_CHANGE_NAME = 'notification.community.rejected.change.name';
-
     // notify type
     const NOTIFY_TYPE_NEW_MESSAGE            = 'new_message';
     const NOTIFY_TYPE_MARKETING              = 'marketing';
@@ -517,7 +493,6 @@ class Consts
     const NOTIFY_TYPE_SESSION_ONLINE         = 'session_online';
     const NOTIFY_TYPE_CONFIRM_GAMELANCER     = 'confirm_gamelancer';
     const NOTIFY_TYPE_NEW_FOLLOWER           = 'new_follower';
-    const NOTIFY_TYPE_NEW_FOLLOWING          = 'new_following';
     const NOTIFY_TYPE_TIP                    = 'tip';
     const NOTIFY_TYPE_SEND_TIP               = 'send_tip';
     const NOTIFY_TYPE_WALLET_COINS           = 'wallet_coins';
@@ -541,18 +516,6 @@ class Consts
     const NOTIFY_TYPE_TASKING_LEVEL_UP       = 'tasking_levelup';
     const NOTIFY_TYPE_TASKING_DAILY_CHECKIN  = 'tasking_daily_checkin';
     const NOTIFY_TYPE_OTHER                  = 'other';
-    const NOTIFY_TYPE_VOICE_ROOM             = 'voice_room';
-    const NOTIFY_TYPE_VOICE_ROOM_CREATED     = 'voice_room_created';
-    const NOTIFY_TYPE_VOICE_ROOM_INVITATION  = 'voice_room_invitation';
-    const NOTIFY_TYPE_COMMUNITY             = 'community';
-    const NOTIFY_TYPE_COMMUNITY_CREATED     = 'community_created';
-    const NOTIFY_TYPE_COMMUNITY_INVITATION  = 'community_invitation';
-    const NOTIFY_TYPE_COMMUNITY_REMOTE      = 'community_remote';
-    const NOTIFY_TYPE_COMMUNITY_REQUEST_TO_JOIN  = 'community_request_to_join';
-    const NOTIFY_TYPE_COMMUNITY_ACCEPT_TO_JOIN  = 'community_request_accept_to_join';
-    const NOTIFY_TYPE_COMMUNITY_REJECT_TO_JOIN  = 'community_request_reject_to_join';
-    const NOTIFY_TYPE_COMMUNITY_APPROVED_CHANGE_NAME  = 'community_approved_change_name';
-    const NOTIFY_TYPE_COMMUNITY_REJECTED_CHANGE_NAME  = 'community_rejected_change_name';
 
     const MIN_COIN_TO_CHAT = 1;
 
@@ -587,13 +550,9 @@ class Consts
     const NOTIFY_SMS_SESSION_STARTING   = 'session_starting';
     const NOTIFY_SMS_VERIFY_CODE        = 'verify_code';
     const NOTIFY_SMS_PHONE_CODE         = 'phone_code';
-    const NOTIFY_SMS_PASSWORD_LINK      = 'password_link';
     const NOTIFY_SMS_PASSWORD_CODE      = 'password_code';
     const NOTIFY_SMS_USERNAME_CODE      = 'username_code';
     const NOTIFY_SMS_CONFIRMATION_CODE  = 'confirmation_code';
-    const NOTIFY_SMS_AUTHORIZATION_CODE = 'authorization_code';
-    const NOTIFY_SMS_APP_VALIDATE_CODE  = 'app_validate_code';
-    const NOTIFY_SMS_APP_LOGIN_CODE     = 'app_login_code';
 
     const DEFAULT_GAME_SERVER = 'Main Server';
     const DEFAULT_GAME_RANK = 'Unranked';
@@ -615,6 +574,7 @@ class Consts
     const QUEUE_PUT_FIREHOSE                        = 'put_firehose';
     const CREATE_MATTERMOST_USER_ENDPOINT_QUEUE     = 'create_mattermost_user';
     const QUEUE_CALCULATE_STATISTIC                 = 'statistic';
+    const CREATE_NODEBB_USER_ENDPOINT_QUEUE         = 'create_nodebb_user';
     const QUEUE_NOTIFICATION                        = 'notification';
     const RANKING_QUEUE                             = 'ranking';
 
@@ -663,97 +623,4 @@ class Consts
     const SECURITY_UNLOCK_TYPE_PASSWORD = 'password';
     const SECURITY_UNLOCK_TYPE_EMAIL = 'email';
     const SECURITY_UNLOCK_TYPE_PHONE = 'phone';
-
-    const CATEGORY_TYPE_CHAT = 'chatting';
-    const CATEGORY_TYPE_USERNAME = 'username';
-    const CATEGORY_TYPE_CODE = 'code';
-    const CATEGORY_TYPE_COMMUNITY = 'community';
-
-    const ROOM_TYPE_PLAY = 'play';
-    const ROOM_TYPE_HANGOUT = 'hangout';
-    const ROOM_TYPE_AMA = 'ama';
-    const ROOM_TYPE_COMMUNITY = 'community';
-
-    const ROOM_USER_TYPE_HOST = 'host';
-    const ROOM_USER_TYPE_GUEST = 'guest';
-    const ROOM_USER_TYPE_MODERATOR = 'moderator';
-    const ROOM_USER_TYPE_SPEAKER = 'speaker';
-
-    const CHATTING_ROOM_CATEGORY_GAME_ID = -1;
-    const CHATTING_ROOM_CATEGORY_GAME_SLUG = 'just-hangout';
-    const CHATTING_ROOM_CATEGORY_GAME_TITLE = 'Just Hangout';
-
-    const VOICE_ROOM_STATUS_CREATED = 'created';
-    const VOICE_ROOM_STATUS_CALLING = 'calling';
-    const VOICE_ROOM_STATUS_ENDED = 'ended';
-
-    const ROOM_REQUEST_STATUS_CREATED = 'created';
-    const ROOM_REQUEST_STATUS_ACCEPTED = 'accepted';
-    const ROOM_REQUEST_STATUS_CANCELED = 'canceled';
-
-    const ROOM_INVITATION_STATUS_CREATED = 'created';
-    const ROOM_INVITATION_STATUS_ACCEPTED = 'accepted';
-
-    const ROOM_INVITATION_TYPE_GUEST = 'guest';
-    const ROOM_INVITATION_TYPE_SPEAKER = 'speaker';
-
-    const QUEUE_VOICE_GROUP = 'voice_group';
-    const QUEUE_COMMUNITY = 'community';
-
-    // for grant custom requests
-    const GRAND_TYPE_CUSTOM_REQUEST = 'custom_request';
-
-    // provider social name
-    const PROVIDER_TIKTOK = 'tiktok';
-
-    const AUTO_EMAIL_TAG = '@gamelancer.com';
-    const AUTO_EMAIL_CHARACTER = '-';
-    const AUTO_EMAIL_RANDOM_STRING_LENGTH = 6;
-
-    const REPORT_STATUS_PROCESSING = 'processing';
-    const REPORT_STATUS_PROCESSED = 'processed';
-
-    const VOICE_GROUP_ROLE_ADMIN = 'admin';
-    const VOICE_GROUP_ROLE_GLOBAL_ADMIN = 'global-admin';
-
-    const ROOM_QUESTION_STATUS_PENDING = 'pending';
-    const ROOM_QUESTION_STATUS_REJECTED = 'rejected';
-    const ROOM_QUESTION_STATUS_ACCEPTED = 'accepted';
-    const ROOM_QUESTION_STATUS_CANCELED = 'canceled';
-    const ROOM_QUESTION_STATUS_ANSWERING = 'answering';
-    const ROOM_QUESTION_STATUS_ANSWERED = 'answered';
-
-    const COMMUNITY_STATUS_CREATED = 'created';
-    const COMMUNITY_STATUS_ACCEPTED = 'accepted';
-    const COMMUNITY_STATUS_CANCELED = 'canceled';
-    const COMMUNITY_STATUS_REJECT = 'rejected';
-    const COMMUNITY_STATUS_PENDING = 'pending';
-    const COMMUNITY_STATUS_APPROVED = 'approved';
-    const COMMUNITY_STATUS_ACTIVE = 'active';
-    const COMMUNITY_STATUS_DEACTIVATED = 'deactivated';
-    const COMMUNITY_STATUS_DELETED = 'deleted';
-    const COMMUNITY_DAYS_FOR_GRACE_PERIOD = 14;
-
-    const COMMUNITY_ROLE_OWNER = 'owner';
-    const COMMUNITY_ROLE_LEADER = 'leader';
-    const COMMUNITY_ROLE_MEMBER = 'member';
-
-    const COMMUNITY_ROOM_CATEGORY_GAME_ID = -2;
-
-    const MATTERMOST_CHANNEL_TYPE_OPEN = 'O';
-    const MATTERMOST_EMOJI_NAME = '+1';
-
-    const SOCKET_PRIVATE_COMMUNITY = 'App.Community.';
-
-    const COMMUNITY_VOICE_ROOM_SIZE = 5000;
-
-    const GENDER_FEMALE = 'female';
-    const GENDER_MALE = 'male';
-    const GENDER_NON_BINARY = 'non_binary';
-    const GENDER_NOT_SAY = 'not_say';
-
-    const USER_DAYS_FOR_GRACE_PERIOD = 14;
-
-    const TYPE_EMAIL = 'email';
-    const TYPE_PHONE = 'phone';
 }

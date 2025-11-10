@@ -17,9 +17,9 @@ return [
     'active_url' => 'The :attribute is not a valid URL.',
     'after' => 'The :attribute must be a date after :date.',
     'after_or_equal' => 'The :attribute must be a date after or equal to :date.',
-    'alpha' => 'The :attribute must only contain letters.',
-    'alpha_dash' => 'The :attribute must only contain letters, numbers, dashes and underscores.',
-    'alpha_num' => 'The :attribute must only contain letters and numbers.',
+    'alpha' => 'The :attribute may only contain letters.',
+    'alpha_dash' => 'The :attribute may only contain letters, numbers, dashes and underscores.',
+    'alpha_num' => 'The :attribute may only contain letters and numbers.',
     'array' => 'The :attribute must be an array.',
     'before' => 'The :attribute must be a date before :date.',
     'before_or_equal' => 'The :attribute must be a date before or equal to :date.',
@@ -77,10 +77,10 @@ return [
         'array' => 'The :attribute must not have more than :value items.',
     ],
     'max' => [
-        'numeric' => 'The :attribute cannot be greater than :max.',
-        'file' => 'The :attribute cannot be greater than :max kilobytes.',
-        'string' => 'The :attribute cannot be greater than :max characters.',
-        'array' => 'The :attribute cannot have more than :max items.',
+        'numeric' => 'The :attribute may not be greater than :max.',
+        'file' => 'The :attribute may not be greater than :max kilobytes.',
+        'string' => 'The :attribute may not be greater than :max characters.',
+        'array' => 'The :attribute may not have more than :max items.',
     ],
     'mimes' => 'The :attribute must be a file of type: :values.',
     'mimetypes' => 'The :attribute must be a file of type: :values.',
@@ -138,10 +138,10 @@ return [
     'session_already_review' => 'You\'ve already reviewed this Session.',
     'exists_username' => 'This username does not exist.',
     'phone' => 'The :attribute field contains an invalid number.',
-    'valid_phone_country_code' => 'The :attribute is invalid.',
+    'valid_phone_contry_code' => 'The :attribute is invalid.',
     'social_type_valid' => 'The social network is not support.',
     'verified_account' => 'The account is not activated.',
-    'exists_phone_number' => 'The selected phone number is invalid.',
+
     /*
     |--------------------------------------------------------------------------
     | Custom Validation Language Lines
@@ -178,20 +178,13 @@ return [
             'exists' => 'The :attribute is invalid.'
         ],
         'username' => [
-            'special_characters' => 'The :attribute only letters (a-z), numbers (0-9), and periods (.), underscore (_) are allowed and should not contain (' . \App\Consts::USER_DELETED_USERNAME_PREFIX . ').'
+            'special_characters' => 'The :attribute not allowing certain special characters.'
         ],
         'email' => [
-            'regex' => 'The :attribute only letters (a-z), numbers (0-9), and periods (.) are allowed.',
-            'special_characters_email' => 'The :attribute should not contain (' . \App\Consts::USER_DELETED_USERNAME_PREFIX . ').'
+            'regex' => 'The :attribute only letters (a-z), numbers (0-9), and periods (.) are allowed.'
         ],
         'receiver_id' => [
             'not_in' => 'You can not tip for yourself.'
-        ],
-        'phone_number' => [
-            'max' => 'The :attribute field is invalid.'
-        ],
-        'game_id' => [
-            'room_category_existed' => 'The game has been existed.'
         ]
     ],
 
@@ -247,12 +240,6 @@ return [
         '*.game_name' => 'username',
         'prioritize' => 'prioritize',
         'social_networks.social_id' => 'social network id',
-        'social_networks.social_type' => 'social network type',
-        'game_id' => 'game',
-        'size_range' => 'size',
-        'topic_category' => 'topic focus',
-        'confirmation_password' => 'repeat password',
-        'password' => 'new password',
-        'sex' => 'gender'
+        'social_networks.social_type' => 'social network type'
     ],
 ];

@@ -22,7 +22,7 @@ class TopicUpdated extends AppBroadcastEvent
      */
     public function __construct($data)
     {
-        $this->data = cloneDeep($data);
+        $this->data = $data;
     }
 
     /**

@@ -110,16 +110,17 @@ class SessionService extends BaseService {
             'gameProfile'    => $gameProfile
         ]);
 
-        $this->createSessionMessage($session, Consts::SESSION_ACTION_BOOK_FREE);
-
         $this->updateSessionTasks($session, Consts::SESSION_ACTION_BOOK_FREE);
 
-        $this->createGamelancerNotification($session, Consts::SESSION_ACTION_BOOK_FREE);
-
-        $this->fireBookSessionSuccess($session);
         $this->fireSessionTabUpdated($session);
 
         $this->performFirehosePut($session, 'Book session');
+
+        $this->createGamelancerNotification($session, Consts::SESSION_ACTION_BOOK_FREE);
+
+        $this->createSessionMessage($session, Consts::SESSION_ACTION_BOOK_FREE);
+
+        $this->fireBookSessionSuccess($session);
 
         return $session;
     }
@@ -165,16 +166,17 @@ class SessionService extends BaseService {
             'escrow_balance'    => $escrowBalances
         ]);
 
-        $this->createSessionMessage($session, Consts::SESSION_ACTION_BOOK_PAID);
-
         $this->updateSessionTasks($session, Consts::SESSION_ACTION_BOOK_PAID);
 
-        $this->createGamelancerNotification($session, Consts::SESSION_ACTION_BOOK_PAID);
-
-        $this->fireBookSessionSuccess($session);
         $this->fireSessionTabUpdated($session);
 
         $this->performFirehosePut($session, 'Book session');
+
+        $this->createGamelancerNotification($session, Consts::SESSION_ACTION_BOOK_PAID);
+
+        $this->createSessionMessage($session, Consts::SESSION_ACTION_BOOK_PAID);
+
+        $this->fireBookSessionSuccess($session);
 
         return $session;
     }
@@ -240,15 +242,15 @@ class SessionService extends BaseService {
         $session->status = Consts::SESSION_STATUS_CANCELED;
         $session->save();
 
-        $this->createSessionMessage($session, Consts::SESSION_ACTION_CANCEL_FREE);
-
         $this->updateSessionTasks($session, Consts::SESSION_ACTION_CANCEL_FREE);
-
-        $this->createGamelancerNotification($session, Consts::SESSION_ACTION_CANCEL_FREE);
 
         $this->fireSessionTabUpdated($session);
 
         $this->performFirehosePut($session, 'Cancel book session');
+
+        $this->createGamelancerNotification($session, Consts::SESSION_ACTION_CANCEL_FREE);
+
+        $this->createSessionMessage($session, Consts::SESSION_ACTION_CANCEL_FREE);
 
         return $session;
     }
@@ -261,15 +263,15 @@ class SessionService extends BaseService {
         $session->status = Consts::SESSION_STATUS_CANCELED;
         $session->save();
 
-        $this->createSessionMessage($session, Consts::SESSION_ACTION_CANCEL_PAID);
-
         $this->updateSessionTasks($session, Consts::SESSION_ACTION_CANCEL_PAID);
-
-        $this->createGamelancerNotification($session, Consts::SESSION_ACTION_CANCEL_PAID);
 
         $this->fireSessionTabUpdated($session);
 
         $this->performFirehosePut($session, 'Cancel book session');
+
+        $this->createGamelancerNotification($session, Consts::SESSION_ACTION_CANCEL_PAID);
+
+        $this->createSessionMessage($session, Consts::SESSION_ACTION_CANCEL_PAID);
 
         return $session;
     }
@@ -293,16 +295,16 @@ class SessionService extends BaseService {
         $session->status = Consts::SESSION_STATUS_REJECTED;
         $session->save();
 
-        $notifyParams = ['auto_action' => $autoAction];
-        $this->createSessionMessage($session, Consts::SESSION_ACTION_REJECT_FREE, $notifyParams);
-
         $this->updateSessionTasks($session, Consts::SESSION_ACTION_REJECT_FREE);
-
-        $this->createUserNotification($session, Consts::SESSION_ACTION_REJECT_FREE, $notifyParams);
 
         $this->fireSessionTabUpdated($session);
 
         $this->performFirehosePut($session, 'Rejected session');
+
+        $notifyParams = ['auto_action' => $autoAction];
+        $this->createUserNotification($session, Consts::SESSION_ACTION_REJECT_FREE, $notifyParams);
+
+        $this->createSessionMessage($session, Consts::SESSION_ACTION_REJECT_FREE, $notifyParams);
 
         return $session;
     }
@@ -321,20 +323,20 @@ class SessionService extends BaseService {
         $session->reason_id = $reason->id;
         $session->save();
 
+        $this->updateSessionTasks($session, Consts::SESSION_ACTION_REJECT_PAID);
+
+        $this->fireSessionTabUpdated($session);
+
+        $this->performFirehosePut($session, 'Rejected session');
+
         $notifyParams = [
             'auto_action' => $autoAction,
             'escrow_balance' => $escrowBalances,
             'reason' => $reason->content
         ];
-        $this->createSessionMessage($session, Consts::SESSION_ACTION_REJECT_PAID, $notifyParams);
-
-        $this->updateSessionTasks($session, Consts::SESSION_ACTION_REJECT_PAID);
-
         $this->createUserNotification($session, Consts::SESSION_ACTION_REJECT_PAID, $notifyParams);
 
-        $this->fireSessionTabUpdated($session);
-
-        $this->performFirehosePut($session, 'Rejected session');
+        $this->createSessionMessage($session, Consts::SESSION_ACTION_REJECT_PAID, $notifyParams);
 
         return $session;
     }
@@ -373,16 +375,16 @@ class SessionService extends BaseService {
         $session->start_at = $now;
         $session->save();
 
-        $this->createSessionMessage($session, Consts::SESSION_ACTION_ACCEPT_FREE);
-
         $this->updateSessionTasks($session, Consts::SESSION_ACTION_ACCEPT_FREE);
-
-        $this->createUserNotification($session, Consts::SESSION_ACTION_ACCEPT_FREE);
 
         $this->fireSessionTabUpdated($session);
         $this->fireSessionPlayingUpdated($session);
 
         $this->performFirehosePut($session, 'Accepted session');
+
+        $this->createUserNotification($session, Consts::SESSION_ACTION_ACCEPT_FREE);
+
+        $this->createSessionMessage($session, Consts::SESSION_ACTION_ACCEPT_FREE);
 
         return $session;
     }
@@ -403,16 +405,16 @@ class SessionService extends BaseService {
         }
         $session->save();
 
-        $this->createSessionMessage($session, Consts::SESSION_ACTION_ACCEPT_PAID);
-
         $this->updateSessionTasks($session, Consts::SESSION_ACTION_ACCEPT_PAID);
-
-        $this->createUserNotification($session, Consts::SESSION_ACTION_ACCEPT_PAID);
 
         $this->fireSessionTabUpdated($session);
         $this->fireSessionPlayingUpdated($session);
 
         $this->performFirehosePut($session, 'Accepted session');
+
+        $this->createUserNotification($session, Consts::SESSION_ACTION_ACCEPT_PAID);
+
+        $this->createSessionMessage($session, Consts::SESSION_ACTION_ACCEPT_PAID);
 
         return $session;
     }
@@ -439,13 +441,13 @@ class SessionService extends BaseService {
 
         $session->save();
 
-        $this->createSessionMessage($session, Consts::SESSION_ACTION_READY);
-
         $this->updateSessionTasks($session, Consts::SESSION_ACTION_READY);
 
         $this->fireSessionPlayingUpdated($session);
 
         $this->performFirehosePut($session, 'Ready session');
+
+        $this->createSessionMessage($session, Consts::SESSION_ACTION_READY);
 
         return $session;
     }
@@ -490,15 +492,15 @@ class SessionService extends BaseService {
             'status'            => Consts::SESSION_ADDING_REQUEST_STATUS_PENDING
         ]);
 
+        $this->fireSessionPlayingUpdated($session);
+
+        $this->performFirehosePut($session, 'Add more session (games or hours)');
+
         $messageParams = [
             'quantity' => $quantityMinutes,
             'escrow_balance' => $escrowBalances
         ];
         $this->createSessionMessage($session, Consts::SESSION_ACTION_ADDTIME, $messageParams);
-
-        $this->fireSessionPlayingUpdated($session);
-
-        $this->performFirehosePut($session, 'Add more session (games or hours)');
 
         return $addingRequest;
     }
@@ -524,15 +526,15 @@ class SessionService extends BaseService {
         $addingRequest->status = Consts::SESSION_ADDING_REQUEST_STATUS_REJECTED;
         $addingRequest->save();
 
+        $this->fireSessionPlayingUpdated($session);
+
+        $this->performFirehosePut($session, 'Rejected add more session');
+
         $messageParams = [
             'quantity' => BigNumber::new($addingRequest->quantity)->mul(60)->toString(), //hours to minutes
             'escrow_balance' => $escrowBalances
         ];
         $this->createSessionMessage($session, Consts::SESSION_ACTION_REJECT_ADDTIME, $messageParams);
-
-        $this->fireSessionPlayingUpdated($session);
-
-        $this->performFirehosePut($session, 'Rejected add more session');
 
         return $addingRequest;
     }
@@ -570,17 +572,17 @@ class SessionService extends BaseService {
         $addingRequest->status = Consts::SESSION_ADDING_REQUEST_STATUS_APPROVED;
         $addingRequest->save();
 
-        $messageParams = [
-            'quantity' => BigNumber::new($addingRequest->quantity)->mul(60)->toString(), //hours to minutes
-            'escrow_balance' => $addingRequest->escrow_balance
-        ];
-        $this->createSessionMessage($session, Consts::SESSION_ACTION_ACCEPT_ADDTIME, $messageParams);
-
         $this->updateSessionTasks($session, Consts::SESSION_ACTION_ACCEPT_ADDTIME);
 
         $this->fireSessionPlayingUpdated($session);
 
         $this->performFirehosePut($session, 'Accepted add more session');
+
+        $messageParams = [
+            'quantity' => BigNumber::new($addingRequest->quantity)->mul(60)->toString(), //hours to minutes
+            'escrow_balance' => $addingRequest->escrow_balance
+        ];
+        $this->createSessionMessage($session, Consts::SESSION_ACTION_ACCEPT_ADDTIME, $messageParams);
 
         return $addingRequest;
     }
@@ -603,9 +605,9 @@ class SessionService extends BaseService {
         $session->status = Consts::SESSION_STATUS_MARK_COMPLETED;
         $session->save();
 
-        $this->createSessionMessage($session, Consts::SESSION_ACTION_MARK_COMPLETE);
-
         $this->fireSessionPlayingUpdated($session);
+
+        $this->createSessionMessage($session, Consts::SESSION_ACTION_MARK_COMPLETE);
 
         return $session;
     }
@@ -631,10 +633,10 @@ class SessionService extends BaseService {
         $session->status = Consts::SESSION_STATUS_RUNNING;
         $session->save();
 
+        $this->fireSessionPlayingUpdated($session);
+
         $messageParams = ['reason' => $reason->content];
         $this->createSessionMessage($session, Consts::SESSION_ACTION_REJECT_COMPLETE, $messageParams);
-
-        $this->fireSessionPlayingUpdated($session);
 
         return $session;
     }
@@ -697,12 +699,11 @@ class SessionService extends BaseService {
 
         $this->createSessionTransaction($session, $actuallyReceived, $paidBalance);
 
-        $messageParams = [
-            'reason' => $reason->content
-        ];
-        $this->createSessionMessage($session, Consts::SESSION_ACTION_STOP, $messageParams);
-
         $this->updateSessionTasks($session, Consts::SESSION_ACTION_STOP);
+
+        $this->fireSessionPlayingUpdated($session);
+
+        $this->performFirehosePut($session, 'Stop session');
 
         $notifyParams = [
             'rewards' => $actuallyReceived,
@@ -713,9 +714,10 @@ class SessionService extends BaseService {
 
         $this->calculateStatistic($session, Consts::SESSION_ACTION_STOP);
 
-        $this->fireSessionPlayingUpdated($session);
-
-        $this->performFirehosePut($session, 'Stop session');
+        $messageParams = [
+            'reason' => $reason->content
+        ];
+        $this->createSessionMessage($session, Consts::SESSION_ACTION_STOP, $messageParams);
 
         return $session;
     }
@@ -740,20 +742,20 @@ class SessionService extends BaseService {
         $session->end_at = Utils::currentMilliseconds();
         $session->save();
 
-        $this->createSessionMessage($session, Consts::SESSION_ACTION_COMPLETE_FREE);
-
         $this->updateSessionTasks($session, Consts::SESSION_ACTION_COMPLETE_FREE);
+
+        $this->fireSessionPlayingUpdated($session);
+
+        $this->performFirehosePut($session, 'Completed session');
 
         $this->createGamelancerNotification($session, Consts::SESSION_ACTION_COMPLETE_FREE);
         $this->createUserNotification($session, Consts::SESSION_ACTION_COMPLETE_FREE);
 
         $this->calculateStatistic($session, Consts::SESSION_ACTION_COMPLETE_FREE);
 
+        $this->createSessionMessage($session, Consts::SESSION_ACTION_COMPLETE_FREE);
+
         $this->collectUserTasking($session, Tasking::PLAY_FREE_SESSION);
-
-        $this->fireSessionPlayingUpdated($session);
-
-        $this->performFirehosePut($session, 'Completed session');
 
         return $session;
     }
@@ -777,6 +779,12 @@ class SessionService extends BaseService {
 
         $this->createSessionTransaction($session, $actuallyReceived, $paidBalance);
 
+        $this->updateSessionTasks($session, Consts::SESSION_ACTION_COMPLETE_PAID);
+
+        $this->fireSessionPlayingUpdated($session);
+
+        $this->performFirehosePut($session, 'Completed session');
+
         $sumTips = Tip::where('object_id', $session->id)
             ->where('type', Consts::OBJECT_TYPE_SESSION)
             ->sum('tip');
@@ -785,20 +793,14 @@ class SessionService extends BaseService {
             'coins' => $paidBalance,
             'tip' => $sumTips
         ];
-        $this->createSessionMessage($session, Consts::SESSION_ACTION_COMPLETE_PAID, $notifyParams);
-
-        $this->updateSessionTasks($session, Consts::SESSION_ACTION_COMPLETE_PAID);
-
         $this->createGamelancerNotification($session, Consts::SESSION_ACTION_COMPLETE_PAID, $notifyParams);
         $this->createUserNotification($session, Consts::SESSION_ACTION_COMPLETE_PAID, $notifyParams);
 
         $this->calculateStatistic($session, Consts::SESSION_ACTION_COMPLETE_PAID);
 
+        $this->createSessionMessage($session, Consts::SESSION_ACTION_COMPLETE_PAID, $notifyParams);
+
         $this->collectUserTasking($session, Tasking::PLAY_FREE_SESSION);
-
-        $this->fireSessionPlayingUpdated($session);
-
-        $this->performFirehosePut($session, 'Completed session');
 
         return $session;
     }
@@ -810,6 +812,7 @@ class SessionService extends BaseService {
             ->first();
 
         $this->validateSession($session);
+
 
         $session->has_restart = Consts::TRUE;
         $session->save();
@@ -891,22 +894,21 @@ class SessionService extends BaseService {
         $session->save();
 
         $tip = array_get($params, 'tip');
+        $notifyParams = [
+            'star' => $review->rate,
+            'review' => $review,
+            'tip' => $tip
+        ];
+        $this->createGamelancerNotification($session, Consts::SESSION_ACTION_REVIEW, $notifyParams);
+
+        $this->calculateStatistic($session, Consts::SESSION_ACTION_REVIEW);
 
         if ($tip) {
             $params['receiver_id'] = $session->gamelancer_id;
             $this->transactionService->tip($params, Consts::TIP_VIA_REVIEW);
         }
 
-        $notifyParams = [
-            'star' => $review->rate,
-            'review' => $review,
-            'tip' => $tip
-        ];
         $this->createSessionMessage($session, Consts::SESSION_ACTION_REVIEW, $notifyParams);
-
-        $this->createGamelancerNotification($session, Consts::SESSION_ACTION_REVIEW, $notifyParams);
-
-        $this->calculateStatistic($session, Consts::SESSION_ACTION_REVIEW);
 
         return $review;
     }
@@ -1264,7 +1266,6 @@ class SessionService extends BaseService {
             case Consts::SESSION_ACTION_REJECT_FREE:
                 $autoAction = array_get($params, 'auto_action');
                 $message = $autoAction ? Consts::NOTIFY_SESSION_REJECT_AUTO_FREE : Consts::NOTIFY_SESSION_REJECT_FREE;
-                $props = ['game_id' => $session->gameProfile->game->id];
                 $data = array_merge(
                     $data,
                     [
@@ -1603,14 +1604,7 @@ class SessionService extends BaseService {
             Consts::FALSE
         );
 
-        $this->createPostMessage(
-            $session->channel->mattermost_channel_id,
-            $message,
-            $systemMessage
-        );
-
-        $userIds = [$session->gamelancer_id, $session->claimer_id];
-        $this->eventSessionMessageUpdated($systemMessage->id, $userIds);
+        $this->createPostMessage($session->channel->mattermost_channel_id, $message, $systemMessage);
     }
 
     private function fireBookSessionSuccess($session)
@@ -2010,17 +2004,17 @@ class SessionService extends BaseService {
         $session->start_at = $session->schedule_at;
         $session->save();
 
-        $this->createSessionMessage($session, Consts::SESSION_ACTION_STARTING_SCHEDULE);
-
         $this->updateSessionTasks($session, Consts::SESSION_ACTION_STARTING_SCHEDULE);
+
+        $this->fireSessionPlayingUpdated($session);
+        $this->fireSessionTabUpdated($session);
+
+        $this->performFirehosePut($session, 'Starting session');
 
         $this->createGamelancerNotification($session, Consts::SESSION_ACTION_STARTING_SCHEDULE);
         $this->createUserNotification($session, Consts::SESSION_ACTION_STARTING_SCHEDULE);
 
-        $this->fireSessionTabUpdated($session);
-        $this->fireSessionPlayingUpdated($session);
-
-        $this->performFirehosePut($session, 'Starting session');
+        $this->createSessionMessage($session, Consts::SESSION_ACTION_STARTING_SCHEDULE);
 
         return $session;
     }
@@ -2045,15 +2039,15 @@ class SessionService extends BaseService {
         $session->status = Consts::SESSION_STATUS_OUTDATED;
         $session->save();
 
+        $this->fireSessionPlayingUpdated($session);
+
         $notifyParams = [
             'rewards' => $actuallyReceived,
         ];
-        $this->createSessionMessage($session, Consts::SESSION_ACTION_OUTDATED, $notifyParams);
-
         $this->createGamelancerNotification($session, Consts::SESSION_ACTION_OUTDATED, $notifyParams);
         $this->createUserNotification($session, Consts::SESSION_ACTION_OUTDATED, $notifyParams);
 
-        $this->fireSessionPlayingUpdated($session);
+        $this->createSessionMessage($session, Consts::SESSION_ACTION_OUTDATED, $notifyParams);
 
         return $session;
     }

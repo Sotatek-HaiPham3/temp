@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use SevenShores\Hubspot\Factory;
 use App\Utils\FileProcessor;
 
 class FileProcessorProvider extends ServiceProvider {
@@ -21,7 +22,7 @@ class FileProcessorProvider extends ServiceProvider {
         $awsBucket      = env('AWS_BUCKET_IMG');
         $awsRegion      = env('AWS_REGION_IMG');
         $fullPath       = true;
-        $cdnDomain      = env('AWS_CDN_DOMAIN_IMG');
+        $cdnDomain      = false;
 
         return new FileProcessor($awsKey, $awsSecretKey, $awsBucket, $awsRegion, $fullPath, $cdnDomain);
       });

@@ -35,16 +35,11 @@ return [
         'sub_text' => 'Please click the button to verify username:',
         'action' => 'Verify'
     ],
-    'otp_email_content' => [
-        'subject' => 'Confirm Your Email Address',
-        'title' => 'Hello',
-        'sub_text' => 'Please type the following code to complete your confirmation',
-        'action' => 'Verify'
-    ],
-    'authorization_code_email_content' => [
-        'subject' => 'Authorise your social account attach on :APP_NAME',
-        'title' => 'Authorise Your Social Account',
-        'sub_text' => 'Please type the following code to complete your confirmation: :code'
+    "otp_email_content" => [
+        "subject" => "Confirm Your Email Address",
+        "title" => "Hello ",
+        "sub_text" => "Please type the following code to complete your confirmation",
+        "action" => "Verify"
     ],
     'change_user_status_email' => [
         'subject' => 'Your account has been changed',
@@ -65,12 +60,6 @@ return [
         'title' => 'Reset Your Password',
         'forget_password_1' => 'We have received your password reset request.',
         'forget_password' => 'Click the link below to create your new password:'
-    ],
-    'reset_password_code' => [
-        'subject' => ':APP_NAME - Password Reset',
-        'title' => 'Reset Your Password',
-        'forget_password_1' => 'We have received your password reset request.',
-        'forget_password' => 'Enter this code below to create your new password:'
     ],
     'claimed_bounty_email' => [
         'subject' => 'Your bounty has been claimed!',

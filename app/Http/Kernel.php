@@ -76,7 +76,7 @@ class Kernel extends HttpKernel
         'auth.account.verified' => \App\Http\Middleware\AccountIsVerified::class,
         'auth.phone.verified' => \App\Http\Middleware\PhoneIsVerified::class,
         'auth.email.verified' => \App\Http\Middleware\EmailIsVerified::class,
-        'mobile_app.requests' => \App\Http\Middleware\MobileAppRequests::class,
+
         'auth.admin' => \App\Http\Middleware\AuthenticateAdmin::class,
         'admin.guest' => \App\Http\Middleware\RedirectIfAdminAuthenticated::class,
         'auth.gamelancer' => \App\Http\Middleware\AuthenticateGamelancer::class,

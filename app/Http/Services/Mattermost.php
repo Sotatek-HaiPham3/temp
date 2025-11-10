@@ -2,10 +2,7 @@
 
 namespace App\Http\Services;
 
-use App\Consts;
 use App\Exceptions\Reports\MattermostException;
-use App\Mattermost\CustomDriver;
-use App\Mattermost\CustomModel;
 use Gnello\Mattermost\Driver;
 use Pimple\Container;
 use App\Models\User;
@@ -15,7 +12,8 @@ use App\Utils\BearerToken;
 use Auth;
 use Exception;
 
-class Mattermost {
+class Mattermost
+{
 
     private static $mattermostTeamId;
 
@@ -36,28 +34,15 @@ class Mattermost {
         return User::where(function ($query) use ($username) {
             $query->where('email', $username)
                 ->orWhere('username', $username);
-            })
+        })
             ->first();
-    }
-
-    public static function getUsersByIds($ids)
-    {
-        $result = static::authenticateForSystem()
-                    ->getUserModel()
-                    ->getUsersByIds($ids);
-
-        if (static::isResponseSucceed($result)) {
-            return static::getContents($result);
-        }
-
-        return null;
     }
 
     public static function getUserByEmail($email)
     {
         $result = static::authenticateForSystem()
-                    ->getUserModel()
-                    ->getUserByEmail($email);
+            ->getUserModel()
+            ->getUserByEmail($email);
 
         if (static::isResponseSucceed($result)) {
             return static::getContents($result);
@@ -69,8 +54,8 @@ class Mattermost {
     public static function getUserByUsername($username)
     {
         $result = static::authenticateForSystem()
-                    ->getUserModel()
-                    ->getUserByUsername($username);
+            ->getUserModel()
+            ->getUserByUsername($username);
 
         if (static::isResponseSucceed($result)) {
             return static::getContents($result);
@@ -106,15 +91,6 @@ class Mattermost {
         return $result->id;
     }
 
-    public static function getTeamMembersByIds($mattermostUserIds)
-    {
-        $systemProvider = static::authenticateForSystem();
-        $result = $systemProvider->getTeamModel()
-            ->getTeamMembersByIds(static::$mattermostTeamId, $mattermostUserIds);
-
-        return static::handleResult($result);
-    }
-
     public static function createUserEndpoint($email, $username)
     {
         $email      = strtolower($email);
@@ -123,11 +99,11 @@ class Mattermost {
         $systemProvider = static::authenticateForSystem();
 
         $result = $systemProvider->getUserModel()->createUser([
-                'email'    => $email,
-                'username' => $username,
-                'password' => config('mattermost.members.user.default_password')
-            ]);
-
+            'email'    => "m_{$email}",
+            'username' => "m_{$username}",
+            'password' => config('mattermost.members.user.default_password')
+        ]);
+logger("======result mattermost======", [$email, $username, $result]);
         $result = static::handleResult($result);
 
         static::addUserIntoMattermostTeam($result->id, $systemProvider);
@@ -155,15 +131,6 @@ class Mattermost {
         return static::handleResult($result);
     }
 
-    public static function addUsersIntoMattermostTeam($mattermostUserIds)
-    {
-        $systemProvider = static::authenticateForSystem();
-
-        $mattermostUserIds->each(function ($mattermostUserId) use ($systemProvider) {
-            static::addUserIntoMattermostTeam($mattermostUserId, $systemProvider);
-        });
-    }
-
     private static function addUserIntoMattermostTeam($mattermostUserId, $systemProvider)
     {
         if (!static::$mattermostTeamId) {
@@ -180,9 +147,7 @@ class Mattermost {
 
     public static function createDirectMessageChannel($mattermostUserId, $oppositeMattermostUserId)
     {
-        $configure = static::getConfigureByMattermostUser($mattermostUserId);
-
-        $result = static::authenticateForUser($configure)
+        $result = static::authenticateForUser()
             ->getChannelModel()
             ->createDirectMessageChannel([
                 $mattermostUserId,
@@ -192,29 +157,14 @@ class Mattermost {
         return static::handleResult($result);
     }
 
-    public static function createChannel($params)
-    {
-        $mattermostUserId = Auth::user()->mattermostUser->mattermost_user_id;
-        $configure = static::getConfigureByMattermostUser($mattermostUserId);
-
-        $params['team_id'] = static::$mattermostTeamId;
-        $result = static::authenticateForUser($configure)
-            ->getChannelModel()
-            ->createChannel($params);
-
-        return static::handleResult($result);
-    }
-
-    public static function createPost($mattermostUserId, $posts)
+    public static function createPost($posts)
     {
         $userConfig = [
             'login_id' => array_get($posts, 'login_id'),
             'password' => config('mattermost.members.user.default_password')
         ];
 
-        $configure = static::getConfigureByMattermostUser($mattermostUserId);
-
-        $result = static::authenticateForUser($configure)
+        $result = static::authenticateForUser($userConfig)
             ->getPostModel()
             ->createPost($posts);
 
@@ -236,23 +186,9 @@ class Mattermost {
         return static::handleResult($result);
     }
 
-    public static function patchPost($postId, $params)
+    public static function deletePost($params)
     {
-        $configure = static::getSystemConfiguration();
-        $result = static::authenticateForUser($configure)
-            ->getPostModel()->patchPost($postId, $params);
-
-        return static::handleResult($result);
-    }
-
-    public static function deletePost($mattermostUserId, $params, $isOwner = false)
-    {
-        $configure = static::getConfigureByMattermostUser($mattermostUserId);
-        if ($isOwner) {
-            $configure = static::getSystemConfiguration();
-        }
-
-        $result = static::authenticateForUser($configure)
+        $result = static::authenticateForUser()
             ->getPostModel()
             ->deletePost($params);
 
@@ -268,24 +204,6 @@ class Mattermost {
         return static::handleResult($result);
     }
 
-    public static function pinPost($mattermostUserId, $postId)
-    {
-        $result = static::authenticateForSystem()
-            ->getPostModel()
-            ->pinPost($postId);
-
-        return static::handleResult($result);
-    }
-
-    public static function unpinPost($mattermostUserId, $postId)
-    {
-        $result = static::authenticateForSystem()
-            ->getPostModel()
-            ->unpinPost($postId);
-
-        return static::handleResult($result);
-    }
-
     public static function getChannelsForUser($mattermostUserId)
     {
         $configure = static::getConfigureByMattermostUser($mattermostUserId);
@@ -293,39 +211,6 @@ class Mattermost {
         $result = static::authenticateForUser($configure)
             ->getChannelModel()
             ->getChannelsForUser($mattermostUserId, static::$mattermostTeamId);
-
-        return static::handleResult($result);
-    }
-
-    public static function getPublicChannels($mattermostUserId)
-    {
-        $configure = static::getConfigureByMattermostUser($mattermostUserId);
-
-        $result = static::authenticateForUser($configure)
-            ->getChannelModel()
-            ->getPublicChannels(static::$mattermostTeamId);
-
-        return static::handleResult($result);
-    }
-
-    public static function deleteChannel($mattermostUserId, $channelId)
-    {
-        $configure = static::getConfigureByMattermostUser($mattermostUserId);
-
-        $result = static::authenticateForUser($configure)
-            ->getChannelModel()
-            ->deleteChannel($channelId);
-
-        return static::handleResult($result);
-    }
-
-    public static function getChannelsPinnedPosts($mattermostUserId, $channelId)
-    {
-        $configure = static::getConfigureByMattermostUser($mattermostUserId);
-
-        $result = static::authenticateForSystem()
-            ->getChannelModel()
-            ->getChannelsPinnedPosts($channelId);
 
         return static::handleResult($result);
     }
@@ -359,62 +244,10 @@ class Mattermost {
         return static::handleResult($result);
     }
 
-    public static function addUserToChannel($channelId, $mattermostUserId) {
-        $configure = static::getConfigureByMattermostUser($mattermostUserId);
-
-        $result = static::authenticateForUser($configure)
-            ->getChannelModel()
-            ->addUser($channelId, [
-                'user_id' => $mattermostUserId
-            ]);
-
-        return static::handleResult($result);
-    }
-
-    public static function removeUserFromChannel($channelId, $mattermostUserId) {
-        $result = static::authenticateForSystem()
-            ->getChannelModel()
-            ->removeUserFromChannel($channelId, $mattermostUserId);
-
-        return static::handleResult($result);
-    }
-
-    public static function reactionPost($mattermostUserId, $postId, $emojiName) {
-        $configure = static::getConfigureByMattermostUser($mattermostUserId);
-
-        $result = static::authenticateForUser($configure)
-            ->getReactionModel()
-            ->saveReaction([
-                'user_id' => $mattermostUserId,
-                'post_id' => $postId,
-                'emoji_name' => $emojiName
-            ]);
-
-        return static::handleResult($result);
-    }
-
-    public static function getReactions($postId)
-    {
-        $result = static::authenticateForUser()->getPostModel()->getReactions($postId);
-        return static::handleResult($result);
-    }
-
-    public static function deleteReaction($mattermostUserId, $postId, $emojiName)
-    {
-        $result = static::authenticateForUser()->getCustomModel()->deleteReaction($mattermostUserId, $postId, $emojiName);
-        return static::handleResult($result);
-    }
-
-    public static function getPost($postId)
-    {
-        $result = static::authenticateForUser()->getPostModel()->getPost($postId);
-        return static::handleResult($result);
-    }
-
     private static function handleResult($result)
     {
         $contents = static::getContents($result);
-
+logger("===responde content====", [$contents]);
         if (!$contents) {
             throw new MattermostException('mattermost.network_error');
         }
@@ -440,10 +273,10 @@ class Mattermost {
     {
         $user = MattermostUser::join('users', 'mattermost_users.user_id', 'users.id')
             ->where('mattermost_users.mattermost_user_id', $mattermostUserId)
-            ->select('users.id', 'users.email', 'mattermost_users.mattermost_email')
+            ->select('users.id', 'users.email')
             ->first();
 
-        if (! $user) {
+        if (!$user) {
             logger()->error('Data wrong', [
                 'mattermost_user_id', $mattermostUserId,
                 'user_id_logged', Auth::id()
@@ -451,9 +284,14 @@ class Mattermost {
             throw new Exception('Some thing wrong with configuration Mattermost');
         }
 
+        // myself is logged in
+        if ($user->id === Auth::id()) {
+            return [];
+        }
+
         return [
             'id' => $user->id,
-            'login_id' => $user->mattermost_email,
+            'login_id' => "m_{$user->email}",
             'password' => config('mattermost.members.user.default_password')
         ];
     }
@@ -462,7 +300,7 @@ class Mattermost {
     {
         $configure = static::getSystemConfiguration();
 
-        /*
+        /* 
          * if has token , will authenticate by token
             static::static::authenticateByToken($configure, $token);
 
@@ -499,12 +337,11 @@ class Mattermost {
         } catch (Exception $ex) {
             logger('=======authenticateForUser::exception:: ', [$ex]);
 
-            $user = Auth::user();
-            $email = $user ? $user->mattermostUser->mattermost_email : null;
+            $user = Auth::user() ?? ['email' => null];
 
             $configure = array_merge($configure, [
                 // 'login_id' => strtolower(Auth::user()->username)
-                'login_id' => $email
+                'login_id' => "m_{$user['email']}"
             ], $userConfig);
             return static::authenticateGrantPassword($configure);
         }
@@ -512,8 +349,8 @@ class Mattermost {
 
     public static function getTokenUser($email, $isSaveToken = false)
     {
-        $configure = array_merge(static::getUserConfiguration(),[
-            'login_id' => $email,
+        $configure = array_merge(static::getUserConfiguration(), [
+            'login_id' => "m_{$email}",
             'password' => config('mattermost.members.user.default_password')
         ]);
 
@@ -532,7 +369,7 @@ class Mattermost {
     private static function authenticateGrantPassword($configure, $fetchToken = false)
     {
         $isValid = array_key_exists('login_id', $configure) && array_key_exists('password', $configure);
-        if (! $isValid) {
+        if (!$isValid) {
             throw new Exception('Cannot authenticate with Mattermost.');
         }
 
@@ -585,7 +422,7 @@ class Mattermost {
 
     private static function authenticateByToken($configure)
     {
-        if (! array_key_exists('token', $configure)) {
+        if (!array_key_exists('token', $configure)) {
             throw new Exception('Token invalid.');
         }
 
@@ -598,15 +435,14 @@ class Mattermost {
             'driver' => $configure
         ]);
 
-        $driver = new CustomDriver($container);
+        $driver = new Driver($container);
         $response = $driver->authenticate();
 
         logger()->info('=========Mattermost::initDriver ', [
             'configure' => static::maskData($configure),
             'token' => $response->getHeader('Token'),
             'status_code' => $response->getStatusCode(),
-            'content' => json_decode($response->getBody()->getContents()),
-            'content_detai' => $response->getBody()->getContents()
+            'content' => json_decode($response->getBody()->getContents())
         ]);
 
         if (!static::isResponseSucceed($response)) {

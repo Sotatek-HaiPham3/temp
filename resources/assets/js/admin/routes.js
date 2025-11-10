@@ -20,7 +20,6 @@ import BannerSetting from './pages/setting/BannerSetting';
 import PlatformSetting from './pages/setting/PlatformSetting';
 import OfferSetting from './pages/setting/OfferSetting';
 import LevelingSetting from './pages/setting/LevelingSetting';
-import VoiceGroupSetting from './pages/setting/VoiceGroupSetting';
 
 import BountyList from './pages/bounties/BountyList';
 import SessionList from './pages/sessions/SessionList';
@@ -28,10 +27,6 @@ import SessionDetail from './pages/sessions/SessionDetail';
 
 import ReviewList from './pages/reviews/ReviewList';
 import UserRestrictPricing from './pages/users/UserRestrictPricing';
-import RequestNameChange from './pages/community/RequestNameChange';
-
-import SmsSetting from './pages/setting/SmsSetting';
-import GalleryManagement from "./pages/community/GalleryManagement";
 
 // import ReviewList from './pages/reviews/ReviewList';
 
@@ -69,51 +64,51 @@ export default new VueRouter({
             hasPermission: true,
           }
         },
-        // {
-        //   path: 'gamelancer-info',
-        //   fullPath: '/users/gamelancer-info',
-        //   name: 'Gamelancer Info',
-        //   component: GamelancerInfo,
-        //   meta: {
-        //     type: 'item',
-        //     icon: '',
-        //     routerNameDisp: 'Gamelancer Forms',
-        //     hasPermission: true,
-        //     sub: ['Session Detail']
-        //   }
-        // },
-        // {
-        //   path: 'gamelancer-info/:id/detail',
-        //   fullPath: '/users/gamelancer-info/:id/detail',
-        //   name: 'Gamelancer Info Detail',
-        //   component: GamelancerInfoDetail,
-        //   meta: {
-        //     hasPermission: true,
-        //   }
-        // },
-        // {
-        //   path: 'invitation-code',
-        //   fullPath: '/users/invitation-code',
-        //   name: 'Invitation Code',
-        //   component: InvitationCode,
-        //   meta: {
-        //     type: 'item',
-        //     icon: '',
-        //     routerNameDisp: 'Invitation Codes',
-        //     hasPermission: true,
-        //   }
-        // },
-        // {
-        //   path: 'balance',
-        //   fullPath: '/users/balance',
-        //   component: UserBalance,
-        //   meta: {
-        //     type: 'item',
-        //     icon: '',
-        //     routerNameDisp: 'Balances',
-        //     hasPermission: true,
-        //   }
-        // }
+        {
+          path: 'gamelancer-info',
+          fullPath: '/users/gamelancer-info',
+          name: 'Gamelancer Info',
+          component: GamelancerInfo,
+          meta: {
+            type: 'item',
+            icon: '',
+            routerNameDisp: 'Gamelancer Forms',
+            hasPermission: true,
+            sub: ['Session Detail']
+          }
+        },
+        {
+          path: 'gamelancer-info/:id/detail',
+          fullPath: '/users/gamelancer-info/:id/detail',
+          name: 'Gamelancer Info Detail',
+          component: GamelancerInfoDetail,
+          meta: {
+            hasPermission: true,
+          }
+        },
+        {
+          path: 'invitation-code',
+          fullPath: '/users/invitation-code',
+          name: 'Invitation Code',
+          component: InvitationCode,
+          meta: {
+            type: 'item',
+            icon: '',
+            routerNameDisp: 'Invitation Codes',
+            hasPermission: true,
+          }
+        },
+        {
+          path: 'balance',
+          fullPath: '/users/balance',
+          component: UserBalance,
+          meta: {
+            type: 'item',
+            icon: '',
+            routerNameDisp: 'Balances',
+            hasPermission: true,
+          }
+        }
       ]
     },
     {
@@ -138,18 +133,18 @@ export default new VueRouter({
             hasPermission: true,
           }
         },
-        // {
-        //   path: 'banners',
-        //   fullPath: '/setting/banners',
-        //   name: 'Banners Setting',
-        //   component: BannerSetting,
-        //   meta: {
-        //     type: 'item',
-        //     icon: '',
-        //     routerNameDisp: 'Banners',
-        //     hasPermission: true,
-        //   }
-        // },
+        {
+          path: 'banners',
+          fullPath: '/setting/banners',
+          name: 'Banners Setting',
+          component: BannerSetting,
+          meta: {
+            type: 'item',
+            icon: '',
+            routerNameDisp: 'Banners',
+            hasPermission: true,
+          }
+        },
         {
           path: 'games',
           fullPath: '/setting/games',
@@ -182,183 +177,122 @@ export default new VueRouter({
             hasPermission: true,
           }
         },
-        // {
-        //   path: 'restrict-pricing',
-        //   fullPath: '/setting/restrict-pricing',
-        //   name: 'User Restrict Pricing',
-        //   component: UserRestrictPricing,
-        //   meta: {
-        //     type: 'item',
-        //     icon: '',
-        //     routerNameDisp: 'User Restrict Pricings',
-        //     hasPermission: true
-        //   }
-        // },
-        // {
-        //   path: 'leveling',
-        //   fullPath: '/setting/leveling',
-        //   name: 'Leveling Setting',
-        //   component: LevelingSetting,
-        //   meta: {
-        //     type: 'item',
-        //     icon: '',
-        //     routerNameDisp: 'Leveling',
-        //     hasPermission: true,
-        //   }
-        // },
         {
-          path: 'voice-group',
-          fullPath: '/setting/voice-group',
-          name: 'Voice Group Setting',
-          component: VoiceGroupSetting,
+          path: 'restrict-pricing',
+          fullPath: '/setting/restrict-pricing',
+          name: 'User Restrict Pricing',
+          component: UserRestrictPricing,
           meta: {
             type: 'item',
             icon: '',
-            routerNameDisp: 'Voice Group',
+            routerNameDisp: 'User Restrict Pricings',
+            hasPermission: true
+          }
+        },
+        {
+          path: 'leveling',
+          fullPath: '/setting/leveling',
+          name: 'Leveling Setting',
+          component: LevelingSetting,
+          meta: {
+            type: 'item',
+            icon: '',
+            routerNameDisp: 'Leveling',
+            hasPermission: true,
+          }
+        }
+      ]
+    },
+    {
+      path: '/transactions',
+      component: WrapPage,
+      meta: {
+        type: 'treeview',
+        icon: 'icon-fund',
+        routerNameDisp: 'Transactions',
+        hasPermission: true,
+      },
+      children: [
+        {
+          path: 'deposit',
+          fullPath: '/transactions/deposit',
+          name: 'Deposit',
+          component: Deposit,
+          meta: {
+            type: 'item',
+            icon: '',
+            routerNameDisp: 'Deposit',
             hasPermission: true,
           }
         },
         {
-          path: 'sms',
-          fullPath: '/setting/sms',
-          name: 'Sms Setting',
-          component: SmsSetting,
+          path: 'withdrawals',
+          fullPath: '/transactions/withdrawals',
+          name: 'withdrawals',
+          component: Withdrawals,
           meta: {
             type: 'item',
             icon: '',
-            routerNameDisp: 'Sms',
+            routerNameDisp: 'Withdrawals',
             hasPermission: true,
           }
         },
       ]
     },
-    // {
-    //   path: '/transactions',
-    //   component: WrapPage,
-    //   meta: {
-    //     type: 'treeview',
-    //     icon: 'icon-fund',
-    //     routerNameDisp: 'Transactions',
-    //     hasPermission: true,
-    //   },
-    //   children: [
-    //     {
-    //       path: 'deposit',
-    //       fullPath: '/transactions/deposit',
-    //       name: 'Deposit',
-    //       component: Deposit,
-    //       meta: {
-    //         type: 'item',
-    //         icon: '',
-    //         routerNameDisp: 'Deposit',
-    //         hasPermission: true,
-    //       }
-    //     },
-    //     {
-    //       path: 'withdrawals',
-    //       fullPath: '/transactions/withdrawals',
-    //       name: 'withdrawals',
-    //       component: Withdrawals,
-    //       meta: {
-    //         type: 'item',
-    //         icon: '',
-    //         routerNameDisp: 'Withdrawals',
-    //         hasPermission: true,
-    //       }
-    //     },
-    //   ]
-    // },
-    // {
-    //   path: '/statistics',
-    //   component: WrapPage,
-    //   meta: {
-    //     type: 'treeview',
-    //     icon: 'fa fa-database',
-    //     routerNameDisp: 'Statistics',
-    //     hasPermission: true,
-    //   },
-    //   children: [
-    //     {
-    //       path: 'bounties',
-    //       fullPath: '/statistics/bounties',
-    //       name: 'Bounties',
-    //       component: BountyList,
-    //       meta: {
-    //         type: 'item',
-    //         icon: '',
-    //         routerNameDisp: 'Bounties',
-    //         hasPermission: true
-    //       }
-    //     },
-    //     {
-    //       path: 'sessions',
-    //       fullPath: '/statistics/sessions',
-    //       name: 'Sessions',
-    //       component: SessionList,
-    //       meta: {
-    //         type: 'item',
-    //         icon: '',
-    //         routerNameDisp: 'Sessions',
-    //         hasPermission: true,
-    //         sub: ['Session Detail']
-    //       }
-    //     },
-    //     {
-    //       path: 'session/:id',
-    //       fullPath: 'statistics/session/:id',
-    //       name: 'Session Detail',
-    //       component: SessionDetail,
-    //       meta: {
-    //         prop: true,
-    //         hasPermission: true,
-    //       }
-    //     },
-    //     {
-    //       path: 'reviews',
-    //       fullPath: '/statistics/reviews',
-    //       name: 'Reviews',
-    //       component: ReviewList,
-    //       meta: {
-    //         type: 'item',
-    //         icon: '',
-    //         routerNameDisp: 'Reviews',
-    //         hasPermission: true
-    //       }
-    //     }
-    //   ]
-    // },
     {
-      path: '/community',
+      path: '/statistics',
       component: WrapPage,
       meta: {
         type: 'treeview',
-        icon: 'icon-telegram',
-        routerNameDisp: 'Community',
-        hasPermission: true
+        icon: 'fa fa-database',
+        routerNameDisp: 'Statistics',
+        hasPermission: true,
       },
       children: [
         {
-          path: 'request-name-change',
-          fullPath: '/community/request-name-change',
-          name: 'Request Name Change',
-          component: RequestNameChange,
+          path: 'bounties',
+          fullPath: '/statistics/bounties',
+          name: 'Bounties',
+          component: BountyList,
           meta: {
             type: 'item',
             icon: '',
-            routerNameDisp: 'Request Name Change',
+            routerNameDisp: 'Bounties',
             hasPermission: true
           }
         },
-
         {
-          path: 'gallery',
-          fullPath: '/community/gallery',
-          name: 'Gallery Management',
-          component: GalleryManagement,
+          path: 'sessions',
+          fullPath: '/statistics/sessions',
+          name: 'Sessions',
+          component: SessionList,
           meta: {
             type: 'item',
             icon: '',
-            routerNameDisp: 'Gallery Management',
+            routerNameDisp: 'Sessions',
+            hasPermission: true,
+            sub: ['Session Detail']
+          }
+        },
+        {
+          path: 'session/:id',
+          fullPath: 'statistics/session/:id',
+          name: 'Session Detail',
+          component: SessionDetail,
+          meta: {
+            prop: true,
+            hasPermission: true,
+          }
+        },
+        {
+          path: 'reviews',
+          fullPath: '/statistics/reviews',
+          name: 'Reviews',
+          component: ReviewList,
+          meta: {
+            type: 'item',
+            icon: '',
+            routerNameDisp: 'Reviews',
             hasPermission: true
           }
         }

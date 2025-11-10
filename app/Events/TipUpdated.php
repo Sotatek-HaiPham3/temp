@@ -28,7 +28,7 @@ class TipUpdated extends AppBroadcastEvent
         $this->receiverId   = $receiverId;
 
         $sessionService    = new SessionService();
-        $this->data     = cloneDeep($sessionService->getTipOnUpdated($session));
+        $this->data     = $sessionService->getTipOnUpdated($session);
 
     }
 

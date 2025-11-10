@@ -96,7 +96,7 @@ class FileUploadService {
         $info['data']['video_id'] = $videoId;
         unset($info['data']['content_id']);
 
-        // CollectTaskingJob::dispatch(Auth::id(), Tasking::UPLOAD_VIDEO_INTRO);
+        CollectTaskingJob::dispatch(Auth::id(), Tasking::UPLOAD_VIDEO_INTRO);
 
         return $info;
     }

@@ -1,15 +1,11 @@
 <?php
 
 return [
-    'verify_account' => '[Gamelancer] :code is your verification code',
+    'verify_account' => 'Thanks for signing up with Gamelancer! Here\'s your verification code: :code',
     'reset_password' => 'Gamelancer: We\'ve received your password reset request. Please click this link to reset your password: :link',
-    'reset_password_code' => '[Gamelancer] :code is your verification code',
-    'change_phone_number' => '[Gamelancer] :code is your verification code',
+    'change_phone_number' => 'Copy and paste the following code to verify phone number: :code',
     'change_username' => 'Please click the link to verify change username: :link',
-    'social_confirmation' => '[Gamelancer] :code is your verification code',
-    'authorization_confirmation' => '[Gamelancer] :code is your verification code',
-    'validate_code' => '[Gamelancer] :code is your verification code',
-    'login_code' => '[Gamelancer] :code is your verification code',
+    'social_confirmation' => 'Please type the following code to complete your confirmation: :code',
     'bounty_request_received' => [
         'title' => "A Gamelancer requested to claim your Bounty!\n\n",
         'bounty_name' => "Bounty name: :bountyName\n",

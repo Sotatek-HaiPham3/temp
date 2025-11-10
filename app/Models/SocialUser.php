@@ -11,6 +11,5 @@ class SocialUser extends Model
     'provider',
     'provider_id',
     'email',
-    'phone_number'
   ];
 }

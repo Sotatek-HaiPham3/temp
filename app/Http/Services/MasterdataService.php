@@ -61,6 +61,7 @@ class MasterdataService
                     case 'languages':
                         $data[$table] = static::getLanguages();
                         break;
+
                     default:
                         $data[$table] = $query->when(Schema::hasColumn($table, 'is_active'), function ($subQuery) {
                                 $subQuery->where('is_active', Consts::TRUE);
@@ -124,7 +125,7 @@ class MasterdataService
 
     private static function getGames()
     {
-        return Game::with(['platforms'])->get();
+        return Game::with(['available_types', 'servers', 'ranks', 'platforms'])->get();
     }
 
     private static function getLanguages()

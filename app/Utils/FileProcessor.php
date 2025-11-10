@@ -2,7 +2,6 @@
 
 namespace App\Utils;
 
-use App\Utils;
 use Exception;
 
 /**
@@ -19,29 +18,21 @@ class FileProcessor {
 
     /**
      * width
-     *
+     * 
      * $w int
      */
     public $w;
 
     /**
      * height
-     *
+     * 
      * $h int
      */
     public $h;
 
     /**
-     * Allow animated images
-     * (False will only process first frame of animated images)
-     *
-     * @var string
-     */
-    public $animated = false;
-
-    /**
      * image src
-     *
+     * 
      * $src string
      */
     public $src;
@@ -49,25 +40,25 @@ class FileProcessor {
     /**
      * bool for is_file or not
      *
-     * @var type
+     * @var type 
      */
     public $is_file;
 
     /**
      *
-     * @var string
+     * @var string 
      */
     public $hash;
 
     /**
      *
-     * @var bool
+     * @var bool 
      */
     public $return_fullpath;
 
     /**
      *
-     * @var string
+     * @var string 
      */
     public $mime_type;
 
@@ -75,7 +66,7 @@ class FileProcessor {
      * The function path on AWS for the Lambda image processor.
      * @var string
      */
-    public $lambda_function_path;
+    public $lambda_function_path = 'arn:aws:lambda:us-west-1:339144675592:function:image-processor';
 
     /**
      * The AWS region where our Lambda processor lives.
@@ -86,36 +77,35 @@ class FileProcessor {
     /**
      * Create an object to process images with Lambda
      * @requires AWS API SDK i.e.... "new Aws\Lambda\LambdaClient"..
-     *
+     * 
      * @param string $aws_access_key
      * AWS access key
-     *
+     * 
      * @param string $aws_secret_access_key
      * AWS secret key
-     *
+     * 
      * @param string $aws_bucket
      * The bucket to use for our processor
-     *
+     * 
      * @param bool $return_fullpath
      * if true, returns full path with http, cdn/bucket, path
      * if false, returns only path without domain
-     *
+     * 
      * @param string $cdn_domain
      * Path to final CDN for delivery if exists.  Default: false
      * Example: content-assets.gamelancer.com
-     *
+     * 
      */
     function __construct($aws_access_key, $aws_secret_access_key, $aws_bucket, $aws_region, $return_fullpath=false, $cdn_domain=false) {
-
+        
         if(!$aws_access_key || !$aws_secret_access_key) {
             die('You must pass in your AWS secret and access keys.');
         }
-
+        
         $this->aws_access_key   = $aws_access_key;
-
+        
         $this->aws_secret_access_key = $aws_secret_access_key;
-        $this->lambda_function_path = env('AWS_LAMBDA_FUNCTION_PATH');
-
+        
         $this->setBucket($aws_bucket);
         $this->setRegion($aws_region);
         $this->setReturnFullpath($return_fullpath);
@@ -141,7 +131,7 @@ class FileProcessor {
 
     /**
      * Change the destination bucket
-     *
+     * 
      * @param string $new_bucket
      */
     public function setBucket($new_bucket) {
@@ -150,7 +140,7 @@ class FileProcessor {
 
     /**
      * Get the currently set destination bucket
-     *
+     * 
      * @param string $new_bucket
      */
     public function getBucket() {
@@ -163,7 +153,7 @@ class FileProcessor {
 
     /**
      * Change the destination region
-     *
+     * 
      * @param string $region
      */
     public function setRegion($region) {
@@ -172,7 +162,7 @@ class FileProcessor {
 
     /**
      * Get the currently set destination region
-     *
+     * 
      * @param string $new_bucket
      */
     public function getRegion() {
@@ -182,48 +172,48 @@ class FileProcessor {
             return $this->aws_region;
         }
     }
-
+    
     /**
      * Execute the lambda function to process and reduce images from an existing
-     * source path on S3 ($s3path) to a destination path on S3 in the
+     * source path on S3 ($s3path) to a destination path on S3 in the 
      * same bucket ($s3dest).
-     *
+     * 
      * @param string $s3path
      * the path ('/original/foo/bar.jpg') of an existing source image.
-     *
+     * 
      * @param string $s3dest
      * the desired path ('/processed/foo/bar.jpg') of processed output.
-     *
+     * 
      * @param int $width
      * Value in pixels of desired output file's maximum width. If set to FALSE,
      * $height will be used to calculate scaled width.
-     *
+     * 
      * @param int $height
      * Value in pixels of desired output file's maximum height. If set to FALSE,
      * $width will be used to calculate a scaled height.
-     *
+     * 
      * @param boolean $thumb
      * When TRUE, $width and $height will be exact values for output,
      * and image is scaled + cropped to fit. Both $width and $height must
      * contain values.
      * When FALSE: Image will be scaled to fit within boundaries of maximum
      * dimensions given in $width and/or $height.
-     *
+     * 
      * @param string $acl
      * Access control list of processed output. Canned ACLs are accepted.
      * Most common: 'private', 'public-read'
-     *
+     * 
      * Examples:
-     * If input image is 25x50, $width is 100, $height is 100, and $thumb is
+     * If input image is 25x50, $width is 100, $height is 100, and $thumb is 
      * set to TRUE, output image will be 100x100 (image will be centered
      * and cropped on the top and bottom).
-     * If input image is 25x50, $width is 100, $height is 100, and $thumb is
+     * If input image is 25x50, $width is 100, $height is 100, and $thumb is 
      * set to FALSE, output image will be 50x100.
-     * If input image is 25x50, $width is 100, $height is FALSE, and $thumb is
+     * If input image is 25x50, $width is 100, $height is FALSE, and $thumb is 
      * set to FALSE, output image will be 100x200.
-     * If input image is 25x50, $width is FALSE, $height is FALSE, and $thumb is
+     * If input image is 25x50, $width is FALSE, $height is FALSE, and $thumb is 
      * set to FALSE, output image will be 25x50.
-     *
+     * 
      * @return boolean
      * @throws Exception
      */
@@ -237,7 +227,7 @@ class FileProcessor {
         if($thumb && (!$width || !$height)) {
             throw new Exception('You must provide both width and height parameters when using the $thumb option.');
         }
-
+        
         $lambda = new \Aws\Lambda\LambdaClient([
             'region' => $this->aws_region,
             'version' => 'latest',
@@ -254,7 +244,6 @@ class FileProcessor {
             'region' => $this->aws_region,
             'src_key' => urldecode($s3path),
             'dest_key' => urldecode($s3dest),
-            'animated' => $this->animated,
             'acl' => $acl,
         ];
 
@@ -269,13 +258,13 @@ class FileProcessor {
         if ($thumb) {
             $req_object->thumb = true;
         }
-
+        
         $response = $lambda->invoke([
             'FunctionName' => $this->lambda_function_path,
             'Payload' => json_encode($req_object)
         ]);
-
-        if (trim($response['Payload']->getContents(), '"') === "Success" || $response['StatusCode'] == 200) {
+        
+        if (trim($response['Payload']->getContents(), '"') === "Success") {
             $result = true;
         } else {
             $result = false;
@@ -286,7 +275,7 @@ class FileProcessor {
 
     /**
      * Return the mime type of an uploaded file
-     *
+     * 
      * @return string mime type
      */
     public function realmime($filepath) {
@@ -301,27 +290,27 @@ class FileProcessor {
 
         return $real_mime_type;
     }
-
+    
     /**
      * Upload an image to an S3 bucket
-     *
-     * @param string $upload_path
+     * 
+     * @param string $upload_path 
      * Desired destination path of new upload (i.e. '/foo/bar.jpg')
-     *
-     * @param string $upload
+     * 
+     * @param string $upload 
      * Existing object to upload (i.e. $_FILES['foo']['tmp_name'])
-     *
-     * @param string $mime
+     * 
+     * @param string $mime 
      * Mimetype for header accuracy
-     *
+     * 
      * @param string $uploadtype
      * 'SourceFile' when passing a File Path
      * 'Body' when passing entire image data loaded into a variable
-     *
+     * 
      * @param string $acl
      * Access control list of processed output. Canned ACLs are accepted.
      * Most common: 'private', 'public-read'
-     *
+     * 
      * @return boolean
      */
     function upload($upload_path, $upload, $mime = 'image/jpeg', $uploadtype = 'SourceFile', $acl = 'public-read') {
@@ -353,28 +342,23 @@ class FileProcessor {
 
             $s3->putObject($object);
             return $upload_path;
-
+           
         }
         return false;
     }
-
+    
     /**
      * upload_image - move an image to S3 if it doesn't
      * already exist on S3, return the path. Retain original dimensions
      * by default.
-     *
+     * 
      * @param type $src
      * @param type $path
-     * @param boolean $animated
-     * @param integer $setWidth
-     * @param integer $setHeight
      *  additional path before hash
-     *
+     * 
      * @return mixed: $string url if success, false if failure.
      */
-    public function upload_image($src, $path=false, $animated = false, $setWidth = 500, $setHeight = 500) {
-        $this->animated = $animated;
-
+    public function upload_image($src, $path=false) {
         $this->src = str_replace('`', '', $src);
 
         if($this->validate_url($this->src)){
@@ -427,15 +411,7 @@ class FileProcessor {
         /**
          * Reducing file size, optimizing
          */
-        $reduced = $this->create($save_path, $reduce_path, $setWidth, $setHeight, false, 'public-read');
-
-        if($reduced) {
-            if($this->return_fullpath) {
-                return $reduced_url . '.webp';
-            } else {
-                return $reduce_path. '.webp';
-            }
-        }
+        $reduced = $this->create($save_path, $reduce_path, false, false, false, 'public-read');
 
         if(!$reduced) {
             return false;
@@ -457,14 +433,14 @@ class FileProcessor {
      * upload_image - move an image to S3 if it doesn't
      * already exist on S3, return the path. Retain original dimensions
      * by default.
-     *
+     * 
      * @param type $src
      *  the source file being uploaded
-     *
+     * 
      * @param type $path
      *  (optional) - s3 folder path to upload image, i.e.
      * /users/1/profile (filename is autogenerated)
-     *
+     * 
      * @return mixed: $string url if success, false if failure.
      */
     public function upload_file($src, $path=false) {
@@ -478,7 +454,7 @@ class FileProcessor {
 
         $this->ext          = pathinfo($this->src, PATHINFO_EXTENSION);
         $this->mime_type    = $this->realmime($this->src);
-
+        
         if(!$this->ext) {
             $this->ext    = $this->mime2ext($this->mime_type);
         }
@@ -486,7 +462,7 @@ class FileProcessor {
         $this->timestamp        =  time();
         $this->hash             = '';
         $this->filename         = 'o-' . $this->timestamp;
-
+        
         if($path){
             $this->hash .= $path;
         } else {
@@ -522,11 +498,11 @@ class FileProcessor {
     /**
      * extra_thumb - Create thumbnail of a recently stored image
      * (from the same session / instance)
-     *
+     * 
      * @param type $w
      * @param type $h
-     * @param string $append_filename
-     *
+     * @param string $append_filename 
+     * 
      * @return mixed: $string url if success, false if failure.
      */
     public function extra_thumb($imageUrl, $w=false, $h=false, $append_filename=false) {
@@ -569,7 +545,7 @@ class FileProcessor {
         }
         // Append extension
         $thumb_path .= ".{$ext}";
-
+        
         $thumb_url = $this->delivery_path . $thumb_path;
 
         /**
@@ -577,14 +553,6 @@ class FileProcessor {
          */
         $thumbnailed = $this->create($reduce_path, $thumb_path, $this->w, $this->h, true, 'public-read');
         // $thumbnailed = $this->create('test/i-1593502826.png', 'test/i-1593502826-250x250_xxxxx.png', $this->w, $this->h, true, 'public-read');
-
-        if($thumbnailed) {
-            if($reduce_path) {
-                return $thumb_url . '.webp';
-            } else {
-                return $thumb_path . '.webp';
-            }
-        }
 
         if(!$thumbnailed) {
             return false;
@@ -613,7 +581,7 @@ class FileProcessor {
 
     /**
      * Validate if a URL is valid
-     *
+     * 
      * @param type $url
      * @return type
      */

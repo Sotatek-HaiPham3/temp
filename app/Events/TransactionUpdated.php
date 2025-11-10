@@ -26,7 +26,7 @@ class TransactionUpdated extends AppBroadcastEvent
     public function __construct($transaction)
     {
         $this->userId = $transaction->user_id;
-        $this->data   = cloneDeep($transaction);
+        $this->data   = $transaction;
     }
 
     /**

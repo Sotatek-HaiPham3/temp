@@ -26,7 +26,7 @@ class BountyInfoUpdated extends AppBroadcastEvent
     {
         $bounty = Bounty::find($bountyId);
         $bountyService = new BountyService();
-        $this->data = cloneDeep($bountyService->getBountyDetail($bounty->slug));
+        $this->data = $bountyService->getBountyDetail($bounty->slug);
     }
 
     /**

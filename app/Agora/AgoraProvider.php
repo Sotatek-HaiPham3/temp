@@ -3,6 +3,7 @@
 namespace App\Agora;
 
 use Illuminate\Support\ServiceProvider;
+use SevenShores\Hubspot\Factory;
 use App\Agora\Support\Model;
 
 class AgoraProvider extends ServiceProvider {

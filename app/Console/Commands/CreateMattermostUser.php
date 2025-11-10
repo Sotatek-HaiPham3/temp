@@ -60,14 +60,9 @@ class CreateMattermostUser extends Command
                     if (!$mattermostUser) {
                         $mattermostUser = Mattermost::createUserEndpoint($user->email, $user->username);
                     }
-                    $email = property_exists($mattermostUser, 'email') && !empty($mattermostUser->email)
-                        ? strtolower($mattermostUser->email)
-                        : (isset($user->email) ? strtolower($user->email) : strtolower(Utils::generateAutoEmail()));
-
                     MattermostUser::create([
                         'user_id' => $user->id,
-                        'mattermost_user_id' => $mattermostUser->id,
-                        'mattermost_email' => $email
+                        'mattermost_user_id' => $mattermostUser->id
                     ]);
                 });
 

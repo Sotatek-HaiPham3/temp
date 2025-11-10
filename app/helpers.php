@@ -226,24 +226,6 @@ if (!function_exists('array_shuffle')) {
 if (!function_exists('cloneDeep')) {
     function cloneDeep($data) {
         $data = json_encode($data);
-        return json_decode($data);
-    }
-}
-
-
-if (!function_exists('str_starts_with')) {
-    function str_starts_with( $haystack, $needle ) {
-         $length = strlen( $needle );
-         return substr( $haystack, 0, $length ) === $needle;
-    }
-}
-
-if (!function_exists('str_ends_with')) {
-    function str_ends_with( $haystack, $needle ) {
-        $length = strlen( $needle );
-        if( !$length ) {
-            return true;
-        }
-        return substr( $haystack, -$length ) === $needle;
+        return json_decode($data, true);
     }
 }

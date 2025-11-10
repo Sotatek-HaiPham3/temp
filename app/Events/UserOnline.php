@@ -24,7 +24,7 @@ class UserOnline extends AppBroadcastEvent
      */
     public function __construct($userId)
     {
-        $this->userId   = cloneDeep($userId);
+        $this->userId   = $userId;
         // $this->data     = $data;
     }
 

@@ -6,8 +6,6 @@ import GameRequest from '../requests/GameRequest';
 import SettingRequest from '../requests/SettingRequest';
 import BountyRequest from '../requests/BountyRequest';
 import SessionRequest from '../requests/SessionRequest';
-import RoomRequest from '../requests/RoomRequest';
-import CommunityRequest from '../requests/CommunityRequest';
 
 const requestMap = {
   AdminRequest,
@@ -17,9 +15,7 @@ const requestMap = {
   GameRequest,
   SettingRequest,
   BountyRequest,
-  SessionRequest,
-  RoomRequest,
-  CommunityRequest
+  SessionRequest
 };
 
 const instances = {};

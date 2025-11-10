@@ -6,7 +6,6 @@ use App\Events\SystemNotification as SystemNotificationEvent;
 use App\Models\SystemNotification as SystemNotificationModel;
 use App\Models\UserSetting;
 use App\Models\User;
-use App\Models\Game;
 use App\Http\Services\FirebaseService;
 use App\Consts;
 use Mail;
@@ -62,18 +61,6 @@ class SystemNotification {
         return $notification;
     }
 
-    public static function notifyRoomActivity($userId, $type, $message, $messageProps = [], $data = [])
-    {
-        $notification = static::create($userId, $type, $message, $messageProps, $data, SystemNotificationModel::TYPE_ROOM);
-        return $notification;
-    }
-
-    public static function notifyCommunityActivity($userId, $type, $message, $messageProps = [], $data = [])
-    {
-        $notification = static::create($userId, $type, $message, $messageProps, $data, SystemNotificationModel::TYPE_COMMUNITY);
-        return $notification;
-    }
-
     public static function notifyOther($userId, $type, $message, $messageProps = [], $data = [])
     {
         $notification = static::create($userId, $type, $message, $messageProps, $data);
@@ -85,28 +72,8 @@ class SystemNotification {
         $filterType = array_get($params, 'filter', null);
         $listType = static::getListNotifyType($filterType);
 
-        $allowTypes = [
-            Consts::NOTIFY_TYPE_NEW_FOLLOWER,
-            Consts::NOTIFY_TYPE_NEW_FOLLOWING,
-            Consts::NOTIFY_TYPE_VIDEO,
-            Consts::NOTIFY_TYPE_VIDEO_COMMENT,
-            Consts::NOTIFY_TYPE_VIDEO_VOTE,
-            Consts::NOTIFY_TYPE_VIDEO_ONLINE,
-            Consts::NOTIFY_TYPE_OTHER,
-            Consts::NOTIFY_TYPE_VOICE_ROOM,
-            Consts::NOTIFY_TYPE_VOICE_ROOM_CREATED,
-            Consts::NOTIFY_TYPE_VOICE_ROOM_INVITATION,
-            Consts::NOTIFY_TYPE_COMMUNITY,
-            Consts::NOTIFY_TYPE_COMMUNITY_CREATED,
-            Consts::NOTIFY_TYPE_COMMUNITY_INVITATION,
-            Consts::NOTIFY_TYPE_COMMUNITY_REQUEST_TO_JOIN,
-            Consts::NOTIFY_TYPE_COMMUNITY_ACCEPT_TO_JOIN,
-            Consts::NOTIFY_TYPE_COMMUNITY_REJECT_TO_JOIN
-        ];
-
         $paginator = SystemNotificationModel::where('receiver_id', $userId)
             ->select('id', 'receiver_id as user_id', 'type', 'message_key', 'message_props', 'data', 'read_at', 'view_at', 'created_at')
-            ->whereIn('type', $allowTypes)
             ->where(function ($query) {
                 $query->whereNull('read_at')
                     ->orWhere('created_at', '>', Carbon::now()->subDays(Consts::LIMIT_DAYS_GET_NOTIFY));
@@ -118,15 +85,9 @@ class SystemNotification {
             ->paginate(array_get($params, 'limit', Consts::DEFAULT_PER_PAGE));
 
         $userIds = $paginator->getCollection()->pluck('data.user.id');
-        $users = User::withoutAppends()
-            ->select('users.id', 'users.username', 'users.sex', 'users.avatar', 'user_settings.online as online_setting')
-            ->join('user_settings', 'user_settings.id', 'users.id')
-            ->whereIn('users.id', $userIds)
-            ->get()
-            ->mapWithKeys(function ($user) {
-                return [$user['id'] => $user];
-            })
-            ->all();
+        $users = User::withoutAppends()->whereIn('id', $userIds)->get()->mapWithKeys(function ($user) {
+            return [$user['id'] => $user];
+        })->all();
 
         $paginator->getCollection()->transform(function ($notify) use ($users) {
             if (empty($notify->data->user)) {
@@ -143,10 +104,8 @@ class SystemNotification {
                 $cloneProps = $notify->message_props ? (object) cloneDeep($notify->message_props) : (object) [];
                 $cloneProps->username = $user->username;
 
-                $notify->data = (object) cloneDeep($cloneData);
-                $notify->message_props = (object) cloneDeep($cloneProps);
-            } else {
-                $notify->message_props = $notify->message_props ? (object) cloneDeep($notify->message_props) : (object) [];
+                $notify->data = cloneDeep($cloneData);
+                $notify->message_props = cloneDeep($cloneProps);
             }
             return $notify;
         });
@@ -266,10 +225,6 @@ class SystemNotification {
             unset($data['smsable']);
         }
 
-        if (empty(static::checkSettingStatus($type, $userId))) {
-            return;
-        }
-
         $notification = SystemNotificationModel::create([
             'type'          => $type,
             'receiver_id'   => $userId,
@@ -278,17 +233,9 @@ class SystemNotification {
             'data'          => $data
         ]);
 
-        static::fireNotificationEvent($userId, $notification);
+        static::pushNotification($notification, $typeActivity);
 
-        // only room type
-        $allowPushNotificationTypes = [
-            Consts::NOTIFY_TYPE_VOICE_ROOM_INVITATION,
-            Consts::NOTIFY_TYPE_VOICE_ROOM_CREATED,
-            Consts::NOTIFY_TYPE_NEW_FOLLOWER
-        ];
-        if (in_array($type, $allowPushNotificationTypes)) {
-            static::pushNotification($notification);
-        }
+        static::fireNotificationEvent($userId, $notification);
 
         if ($typeActivity) {
             static::notifyActivity($notification, $typeActivity, $mailable, $smsable);
@@ -311,61 +258,36 @@ class SystemNotification {
             $cloneProps = $notification->message_props ? (object) cloneDeep($notification->message_props) : (object) [];
             $cloneProps->username = $user->username;
 
-            $notification->data = (object) cloneDeep($cloneData);
-            $notification->message_props = (object) cloneDeep($cloneProps);
+            $notification->data = cloneDeep($cloneData);
+            $notification->message_props = cloneDeep($cloneProps);
         }
         event(new SystemNotificationEvent($userId, cloneDeep($notification)));
     }
 
-    private static function pushNotification($notification)
+    private static function pushNotification($notification, $title)
     {
-        $title = 'other_nofify';
-        switch ($notification->type) {
-            case Consts::NOTIFY_TYPE_VOICE_ROOM_INVITATION:
-                $title = 'room_invitation';
-                break;
-            case Consts::NOTIFY_TYPE_VOICE_ROOM_CREATED:
-                $title = 'room_started';
-                break;
-            case Consts::NOTIFY_TYPE_NEW_FOLLOWER:
-                if ($notification->message_key === Consts::NOTIFY_NEW_FOLLOW) {
-                    $title = 'new_follower';
-                } else {
-                    $title = 'new_follower.friend';
-                }
-                break;
-            default:
-                break;
-        }
-
         $data = (array) $notification->data;
         $data['type'] = $notification->type;
-        $data['notification_count'] = static::totalUnview($notification->receiver_id);
 
         $params = [
-            'title' => $title ? __('notification.title.' . $title) : __(Consts::OTHER_NOTIFY_APP),
+            'title' => $title ? __('notification.' . $title) : __(Consts::OTHER_NOTIFY_APP),
             'body' => static::getBodyOfNotification($notification),
             'data' => $data
         ];
 
-        (new FirebaseService())->pushNotification($notification->receiver_id, $params);
+        (new FirebaseService())->pushNotifcation($notification->receiver_id, $params);
     }
 
     private static function getBodyOfNotification($notification)
     {
         $data = (array) $notification->message_props;
 
-        if (array_key_exists('room_category', $data)) {
-            $gameTitle = Game::where('id', $data['room_category'])->value('title');
-            $data['room_category_name'] = $gameTitle ? $gameTitle : 'Just Hangout';
-        }
+        $shouldReplace = (array_key_exists('rewards', $data) && empty($data['rewards'])) ||
+            (array_key_exists('coins', $data) && empty($data['coins']));
 
-        // $shouldReplace = (array_key_exists('rewards', $data) && empty($data['rewards'])) ||
-        //     (array_key_exists('coins', $data) && empty($data['coins']));
+        $messageKey = $shouldReplace ? "{$notification->message_key}_0" : $notification->message_key;
 
-        // $messageKey = $shouldReplace ? "{$notification->message_key}_0" : $notification->message_key;
-
-        return __($notification->message_key, $data);
+        return __($messageKey, $data);
     }
 
     private static function notifyActivity($notification, $typeActivity, $mailable, $smsable = null)
@@ -479,25 +401,6 @@ class SystemNotification {
 
     public static function sendExceptionEmail($content)
     {
-        // ExceptionEmailJob::dispatch($content)->onQueue(Consts::QUEUE_EXCEPTION_EMAIL);
-    }
-
-    private static function checkSettingStatus ($type, $receiveId) {
-        $setting = static::getUserSetting($receiveId);
-        switch ($type) {
-            case Consts::NOTIFY_TYPE_NEW_FOLLOWER:
-            case Consts::NOTIFY_TYPE_NEW_FOLLOWING:
-                return $setting['follower_notification'];
-                break;
-            case Consts::NOTIFY_TYPE_VOICE_ROOM_INVITATION:
-                return $setting['room_invite_notification'];
-                break;
-            case Consts::NOTIFY_TYPE_VOICE_ROOM_CREATED:
-                return $setting['room_start_notification'];
-                break;
-            default:
-                return true;
-                break;
-        }
+        ExceptionEmailJob::dispatch($content)->onQueue(Consts::QUEUE_EXCEPTION_EMAIL);
     }
 }

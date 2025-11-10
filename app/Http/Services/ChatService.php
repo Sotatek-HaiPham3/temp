@@ -218,7 +218,7 @@ class ChatService
             'data' => ['user' => $user, 'type' => Consts::NOTIFY_NEW_MESSAGE]
         ];
 
-        $this->fcmService->pushNotification($channel->getOppositeUserId($userId), $params);
+        $this->fcmService->pushNotifcation($channel->getOppositeUserId($userId), $params);
 
         // Update last_post for channel in cache
         $this->updateChannelWhenNewPost($post, $channel);
@@ -688,25 +688,7 @@ class ChatService
 
     public function getMattermostToken()
     {
-        $user = Auth::user();
-        $mm = $user->mattermostUser;
-
-        if (!$mm) {
-            // Auto-provision Mattermost account for this user if missing
-            $email = strtolower(Utils::generateAutoEmail());
-            $username = Utils::generateAutoUsername($user->username);
-            $mattermostUser = Mattermost::createUserEndpoint($email, $username);
-
-            MattermostUser::create([
-                'user_id' => $user->id,
-                'mattermost_user_id' => $mattermostUser->id,
-                'mattermost_email' => $email
-            ]);
-
-            $mm = (object) ['mattermost_email' => $email];
-        }
-
-        return Mattermost::getTokenUser($mm->mattermost_email, true);
+        return Mattermost::getTokenUser(Auth::user()->email, true);
     }
 
     public function getTotalChannelsUnreadMessage()
@@ -745,6 +727,6 @@ class ChatService
             }
         });
 
-        return [];
+        return 'ok';
     }
 }

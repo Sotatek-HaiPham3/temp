@@ -622,7 +622,7 @@ class ChatUtils {
         });
     }
 
-    public static function updateUserInfo($user)
+    public static function updateUserInfo(User $user)
     {
         $key = static::getMembersKey();
         $cacheData = static::hasKeyInCache($key) ? static::getFromCache($key) : collect([]);

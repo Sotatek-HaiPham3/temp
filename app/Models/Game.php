@@ -21,11 +21,7 @@ class Game extends Model
         'description',
         'genre',
         'order',
-        'auto_order',
-        'ios_app_id',
-        'android_app_id',
-        'portrait_background',
-        'type'
+        'auto_order'
     ];
 
     public function ranks()

@@ -19,14 +19,14 @@ class UserFollowing extends Model
     {
         return $this->hasOne('App\Models\User', 'id', 'following_id')
             ->with(['statistic', 'visibleSettings'])
-            ->select('id', 'username', 'avatar', 'last_time_active', 'level', 'sex', 'status', 'deleted_at');
+            ->select('id', 'username', 'avatar', 'last_time_active', 'level', 'sex');
     }
 
     public function fan()
     {
         return $this->hasOne('App\Models\User', 'id', 'user_id')
             ->with(['statistic', 'visibleSettings'])
-            ->select('id', 'username', 'avatar', 'last_time_active', 'level', 'sex', 'status', 'deleted_at');
+            ->select('id', 'username', 'avatar', 'last_time_active', 'level', 'sex');
     }
 
     public static function userHasFollowerByFollowingId($userId, $followingId)

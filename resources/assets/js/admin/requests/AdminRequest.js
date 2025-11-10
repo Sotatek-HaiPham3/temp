@@ -109,9 +109,4 @@ export default class AdminRequest extends BaseRequest {
     let url = '/admin/api/reviews/delete'
     return this.del(url, params)
   }
-
-  getGamesData (params) {
-    let url = '/admin/api/masterdata/games'
-    return this.get(url, params)
-  }
 }

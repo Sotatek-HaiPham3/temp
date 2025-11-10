@@ -27,7 +27,7 @@ class SessionSystemMessageUpdated extends AppBroadcastEvent
     {
         $systemMessage = SessionSystemMessage::find($systemMessageId);
         $this->userId = $userId;
-        $this->data = cloneDeep((object) ['system_msg' => $systemMessage]);
+        $this->data = (object) ['system_msg' => $systemMessage];
     }
 
     /**

@@ -11,8 +11,6 @@ class UserReport extends Model
     protected $fillable = [
         'user_id',
         'report_user_id',
-        'reason_id',
-        'details',
-        'status'
+        'reason'
     ];
 }

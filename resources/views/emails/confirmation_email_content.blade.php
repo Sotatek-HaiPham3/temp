@@ -41,7 +41,7 @@
             border-radius: 3px;">{{ $code }}</span>
     </div>
     <div style="margin-top: 30px; text-align: center;">
-        <a href="{{ verify_account_checking_url($email, $code) }}"
+        <a href="{{ verify_account_checking_url($email, $code, $vip) }}"
             style="
                 background-color: rgb(2, 210, 131);
                 width: 100%;
@@ -65,9 +65,9 @@
         </a>
     </div>
     <div class="link" style="margin-top: 18px;text-align: center;">
-        <a href="{{ verify_account_checking_url($email, $code) }}"
+        <a href="{{ verify_account_checking_url($email, $code, $vip) }}"
             style="text-decoration: none; font-size: 11px; line-height: 20px; color: #6a6a6a; opacity: 1;">
-            {{ verify_account_checking_url($email, $code) }}
+            {{ verify_account_checking_url($email, $code, $vip) }}
         </a>
 
         <i style="display: block;">@lang('emails.confirmation_email_content.expired', [], $userLocale)</i>

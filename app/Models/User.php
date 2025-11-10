@@ -40,9 +40,7 @@ class User extends Authenticatable
         'audio',
         'phone_number',
         'phone_country_code',
-        'auto_accept_booking',
-        'status',
-        'deleted_at'
+        'auto_accept_booking'
     ];
 
     // private $idols = [];
@@ -58,12 +56,12 @@ class User extends Authenticatable
     ];
 
     protected $appends = [
-        // 'existsCreditCard',
-        // 'newEmail',
-        // 'newUsername',
-        // 'newPhoneNumber',
-        // 'isFirstLogin',
-        // 'isGamelancer'
+        'existsCreditCard',
+        'newEmail',
+        'newUsername',
+        'newPhoneNumber',
+        'isFirstLogin',
+        'isGamelancer'
     ];
 
     /**
@@ -180,7 +178,7 @@ class User extends Authenticatable
     public function settings()
     {
         return $this->hasOne('App\Models\UserSetting', 'id', 'id')
-            ->select('id', 'public_chat', 'user_has_money_chat', 'auto_accept_booking');
+            ->select('id', 'message_email', 'favourite_email', 'marketing_email', 'bounty_email', 'session_email', 'marketing_phone_number', 'bounty_phone_number', 'session_phone_number', 'public_chat', 'user_has_money_chat', 'auto_accept_booking');
     }
 
     public function visibleSettings()
@@ -197,7 +195,7 @@ class User extends Authenticatable
 
     public function socialUser()
     {
-        return $this->hasMany('App\Models\SocialUser');
+        return $this->hasOne('App\Models\SocialUser');
     }
 
     public function availableTimes()
@@ -221,16 +219,14 @@ class User extends Authenticatable
     {
         return $this->hasOne('App\Models\ChangeEmailHistory')
             ->select('user_id', 'new_email')
-            ->where('email_verified', Consts::FALSE)
-            ->orderBy('id', 'desc');
+            ->where('email_verified', Consts::FALSE);
     }
 
     public function phoneChanging()
     {
         return $this->hasOne('App\Models\ChangePhoneNumberHistory')
             ->select('user_id', 'new_phone_number', 'new_phone_country_code')
-            ->where('verified', Consts::FALSE)
-            ->orderBy('id', 'desc');
+            ->where('verified', Consts::FALSE);
     }
 
     public function phoneChangeCode()
@@ -315,6 +311,11 @@ class User extends Authenticatable
         return $this->hasOne('App\Models\MattermostUser');
     }
 
+    public function nodebbUser()
+    {
+        return $this->hasOne('App\Models\NodebbUser');
+    }
+
     public function channelMembers()
     {
         return $this->hasMany('App\Models\ChannelMember');
@@ -326,24 +327,6 @@ class User extends Authenticatable
      */
     public function routeNotificationFor()
     {
-        // return $this->newPhoneNumber;
-    }
-
-    public function voiceChatRoomUser()
-    {
-        return $this->hasMany('App\Models\VoiceChatRoomUser');
-    }
-
-    public function groupChatUser()
-    {
-        return $this->hasMany('App\Models\CommunityMember');
-    }
-
-    public function getSidByRoomId($roomId)
-    {
-        return $this->voiceChatRoomUser()
-            ->where('room_id', $roomId)
-            ->whereNull('ended_time')
-            ->value('sid');
+        return $this->newPhoneNumber;
     }
 }

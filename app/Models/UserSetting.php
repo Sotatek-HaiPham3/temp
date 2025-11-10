@@ -23,9 +23,6 @@ class UserSetting extends Model
         'visible_gender',
         'visible_following',
         'online',
-        'cover',
-        'follower_notification',
-        'room_invite_notification',
-        'room_start_notification'
+        'cover'
     ];
 }

@@ -21,24 +21,19 @@
       "node_args": ""
     },
     {
+      "name": "gamelancer-nodebb-jobs",
+      "script": "php /var/www/gamelancer-api/artisan queue:work --daemon --tries=5 --queue=create_nodebb_user",
+      "node_args": ""
+    },
+    {
       "name": "gamelancer-notification-jobs",
       "script": "php /var/www/gamelancer-api/artisan queue:work --daemon --tries=5 --queue=notification",
       "node_args": ""
     },
     {
-      "name": "gamelancer-voice-group-jobs",
-      "script": "php /var/www/gamelancer-api/artisan queue:work --daemon --tries=5 --queue=voice_group",
-      "node_args": ""
-    },
-    {
-      "name": "gamelancer-community-jobs",
-      "script": "php /var/www/gamelancer-api/artisan queue:work --daemon --tries=5 --queue=community",
+      "name": "gamelancer-ranking-jobs",
+      "script": "php /var/www/gamelancer-api/artisan queue:work --daemon --tries=5 --queue=ranking",
       "node_args": ""
     }
-    // {
-    //   "name": "gamelancer-ranking-jobs",
-    //   "script": "php /var/www/gamelancer-api/artisan queue:work --daemon --tries=5 --queue=ranking",
-    //   "node_args": ""
-    // }
   ]
 }

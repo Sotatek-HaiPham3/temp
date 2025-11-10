@@ -56,7 +56,7 @@
 
           <div class="group-file">
             <div class="form-group col-xs-4">
-              <label class="game-form-label">Logo:</label>
+              <label class="game-form-label">Logo <sup>*</sup>:</label>
               <div class="clearfix"></div>
               <div class="custom-file">
                 <label class="custom-file-label" for="logo">
@@ -83,7 +83,7 @@
             </div>
 
             <div class="form-group col-xs-4">
-              <label class="game-form-label">Heading Background:</label>
+              <label class="game-form-label">Thumbnail <sup>*</sup>:</label>
               <div class="clearfix"></div>
               <div class="custom-file">
                 <label class="custom-file-label" for="thumbnail">
@@ -110,7 +110,7 @@
             </div>
 
             <div class="form-group col-xs-4">
-              <label class="game-form-label">Sidebar Thumbnail:</label>
+              <label class="game-form-label">Thumbnail hover <sup>*</sup>:</label>
               <div class="clearfix"></div>
               <div class="custom-file">
                 <label class="custom-file-label" for="thumbnail-hover">
@@ -139,7 +139,7 @@
 
           <div class="group-file">
             <div class="form-group col-xs-4">
-              <label class="game-form-label">Sidebar Thumbnail Hover:</label>
+              <label class="game-form-label">Thumbnail active <sup>*</sup>:</label>
               <div class="clearfix"></div>
               <div class="custom-file">
                 <label class="custom-file-label" for="thumbnail-active">
@@ -166,7 +166,7 @@
             </div>
 
             <div class="form-group col-xs-4">
-              <label class="game-form-label">Call For Action Banner:</label>
+              <label class="game-form-label">Banner <sup>*</sup>:</label>
               <div class="clearfix"></div>
               <div class="custom-file">
                 <label class="custom-file-label" for="banner">
@@ -193,7 +193,7 @@
             </div>
 
             <div class="form-group col-xs-4">
-              <label class="game-form-label">Square Thumbnail:</label>
+              <label class="game-form-label">Portrait <sup>*</sup>:</label>
               <div class="clearfix"></div>
               <div class="custom-file">
                 <label class="custom-file-label" for="portrait">
@@ -223,7 +223,7 @@
           <div class="clearfix"></div>
 
           <div class="form-group col-xs-4">
-            <label class="game-form-label">Page Background:</label>
+            <label class="game-form-label">Cover <sup>*</sup>:</label>
             <div class="clearfix"></div>
             <div class="custom-file">
               <label class="custom-file-label" for="cover">
@@ -245,33 +245,6 @@
             <div class="review_image">
               <div class="group-thumbnail" v-if="cover.path || game.cover">
                 <img :src="cover.path ? cover.path : game.cover">
-              </div>
-            </div>
-          </div>
-
-          <div class="form-group col-xs-4">
-            <label class="game-form-label">Portrait Background:</label>
-            <div class="clearfix"></div>
-            <div class="custom-file">
-              <label class="custom-file-label" for="portrait-background">
-                Choose File
-              </label>
-              <div class="clearfix"></div>
-              <div class="error-box">
-                <span v-show="errors.has('portraitBackground')" class="f-left is-error">{{ errors.first('portraitBackground') }}</span>
-              </div>
-              <input type="file"
-                     id="portrait-background"
-                     ref="inputPortraitBackground"
-                     accept="image/x-png,image/jpg,image/jpeg"
-                     @change="onChangePortraitBackground"
-                     @focus="resetError"
-                     class="input-file">
-            </div>
-            <div class="clearfix"></div>
-            <div class="review_image">
-              <div class="group-thumbnail" v-if="portraitBackground.path || game.portrait_background">
-                <img :src="portraitBackground.path ? portraitBackground.path : game.portrait_background">
               </div>
             </div>
           </div>
@@ -378,36 +351,6 @@
               <span v-show="errors.has('auto-order')" class="f-left is-error">{{ errors.first('auto-order') }}</span>
             </div>
           </div>
-          <div class="clearfix"></div>
-          <div class="form-group col-xs-4">
-            <label class="game-form-label">IOS App ID :</label>
-            <div class="clearfix"></div>
-            <input
-                    v-model.trim="game.ios_app_id"
-                    @focus="resetError"
-                    placeholder="IOS App ID"
-                    name="ios_app_id"
-                    data-vv-validate-on="none"
-                    maxlength="50"
-                    type="text"
-                    class="form-control">
-            <div class="clearfix"></div>
-          </div>
-
-          <div class="form-group col-xs-4">
-            <label class="game-form-label">Android App ID :</label>
-            <div class="clearfix"></div>
-            <input
-                    v-model.trim="game.android_app_id"
-                    @focus="resetError"
-                    placeholder="Android App ID"
-                    name="android_app_id"
-                    data-vv-validate-on="none"
-                    maxlength="50"
-                    type="text"
-                    class="form-control">
-            <div class="clearfix"></div>
-          </div>
 
           <div class="col-xs-12 form-group">
             <button class="btn_button_done mr-10" @click.stop="onClickedSubmit()">{{$t('common.done')}}</button>
@@ -454,9 +397,7 @@
           slug: '',
           is_active: 1,
           platforms: [],
-          auto_order: 1,
-          ios_app_id: '',
-          android_app_id: ''
+          auto_order: 1
         },
         thumbnail: {
           path: null,
@@ -493,11 +434,6 @@
           input: null,
           name: null
         },
-        portraitBackground: {
-          path: null,
-          input: null,
-          name: null
-        },
         MIN_VALUE_ORDER
       }
     },
@@ -511,7 +447,7 @@
     },
 
     methods: {
-      isUpdateGame() {
+      isUpdateGame() { 
         return this.$route.params.id
       },
 
@@ -524,7 +460,6 @@
           this.banner.path = this.game.banner
           this.portrait.path = this.game.portrait
           this.cover.path = this.game.cover
-          this.portraitBackground.path = this.game.portrait_background
         }
       },
 
@@ -535,6 +470,48 @@
 
         this.resetError()
         await this.$validator.validateAll()
+        if (!this.logo.input && !this.logo.path) {
+          this.errors.add({
+            field: 'logo',
+            msg: 'The logo file is required.'
+          })
+        }
+        if (!this.thumbnail.input && !this.thumbnail.path) {
+          this.errors.add({
+            field: 'thumbnail',
+            msg: 'The thumbnail file is required.'
+          })
+        }
+        if (!this.thumbnailHover.input && !this.thumbnailHover.path) {
+          this.errors.add({
+            field: 'thumbnailHover',
+            msg: 'The thumbnail hover file is required.'
+          })
+        }
+        if (!this.thumbnailActive.input && !this.thumbnailActive.path) {
+          this.errors.add({
+            field: 'thumbnailActive',
+            msg: 'The thumbnail active file is required.'
+          })
+        }
+        if (!this.banner.input && !this.banner.path) {
+          this.errors.add({
+            field: 'banner',
+            msg: 'The banner file is required.'
+          })
+        }
+        if (!this.portrait.input && !this.portrait.path) {
+          this.errors.add({
+            field: 'portrait',
+            msg: 'The portrait file is required.'
+          })
+        }
+        if (!this.cover.input && !this.cover.path) {
+          this.errors.add({
+            field: 'cover',
+            msg: 'The cover file is required.'
+          })
+        }
         if (size(this.newPlatforms) <= 0 && size(this.game.platforms) <= 0) {
           this.errors.add({
             field: 'platform',
@@ -558,8 +535,6 @@
         formData.append('title', this.game.title)
         formData.append('slug', this.game.slug)
         formData.append('is_active', this.game.is_active)
-        formData.append('ios_app_id', this.game.ios_app_id || '')
-        formData.append('android_app_id', this.game.android_app_id || '')
         formData.append('order', parseInt(this.game.order))
         formData.append('auto_order', this.game.auto_order ? 1 : 0)
         formData.append('logo', this.logo.input ? this.logo.input : this.logo.path)
@@ -572,7 +547,6 @@
         formData.append('cover', this.cover.input ? this.cover.input : this.cover.path)
         formData.append('servers', JSON.stringify(this.servers))
         formData.append('ranks', JSON.stringify(this.ranks))
-        formData.append('portrait_background', this.portraitBackground.input ? this.portraitBackground.input : this.portraitBackground.path)
         return formData
       },
 
@@ -738,7 +712,7 @@
           this.$refs.inputThumbnail.value = ''
           this.errors.add({
             field: 'thumbnail',
-            msg: 'The heading background file type is invalid.'
+            msg: 'The thumbnail file type is invalid.'
           })
           return
         }
@@ -746,7 +720,7 @@
         if (files[0].size > MAXIMUM_FILESIZE) {
           this.errors.add({
             field: 'thumbnail',
-            msg: 'The heading background file size can not exceed 10MB!'
+            msg: 'The thumbnail file size can not exceed 10MB!'
           })
           return
         }
@@ -768,7 +742,7 @@
           this.$refs.inputThumbnailHover.value = ''
           this.errors.add({
             field: 'thumbnailHover',
-            msg: 'The sidebar thumbnail file type is invalid.'
+            msg: 'The thumbnail hover file type is invalid.'
           })
           return
         }
@@ -776,7 +750,7 @@
         if (files[0].size > MAXIMUM_FILESIZE) {
           this.errors.add({
             field: 'thumbnailHover',
-            msg: 'The sidebar thumbnail file size can not exceed 10MB!'
+            msg: 'The thumbnail hover file size can not exceed 10MB!'
           })
           return
         }
@@ -798,7 +772,7 @@
           this.$refs.inputThumbnailActive.value = ''
           this.errors.add({
             field: 'thumbnailActive',
-            msg: 'The sidebar thumbnail hover file type is invalid.'
+            msg: 'The thumbnail active file type is invalid.'
           })
           return
         }
@@ -806,7 +780,7 @@
         if (files[0].size > MAXIMUM_FILESIZE) {
           this.errors.add({
             field: 'thumbnailActive',
-            msg: 'The sidebar thumbnail hover file size can not exceed 10MB!'
+            msg: 'The thumbnail active file size can not exceed 10MB!'
           })
           return
         }
@@ -828,7 +802,7 @@
           this.$refs.inputBanner.value = ''
           this.errors.add({
             field: 'banner',
-            msg: 'The call for action banner file type is invalid.'
+            msg: 'The banner file type is invalid.'
           })
           return
         }
@@ -836,7 +810,7 @@
         if (files[0].size > MAXIMUM_FILESIZE) {
           this.errors.add({
             field: 'banner',
-            msg: 'The call for action banner file size can not exceed 10MB!'
+            msg: 'The banner file size can not exceed 10MB!'
           })
           return
         }
@@ -858,7 +832,7 @@
           this.$refs.inputPortrait.value = ''
           this.errors.add({
             field: 'portrait',
-            msg: 'The square thumbnail file type is invalid.'
+            msg: 'The portrait file type is invalid.'
           })
           return
         }
@@ -866,7 +840,7 @@
         if (files[0].size > MAXIMUM_FILESIZE) {
           this.errors.add({
             field: 'portrait',
-            msg: 'The square thumbnail file size can not exceed 10MB!'
+            msg: 'The portrait file size can not exceed 10MB!'
           })
           return
         }
@@ -886,50 +860,20 @@
           this.$refs.inputCover.value = ''
           this.errors.add({
             field: 'cover',
-            msg: 'The page background file type is invalid.'
+            msg: 'The cover file type is invalid.'
           })
           return
         }
         if (files[0].size > MAXIMUM_FILESIZE) {
           this.errors.add({
             field: 'cover',
-            msg: 'The page background file size can not exceed 10MB!'
+            msg: 'The cover file size can not exceed 10MB!'
           })
           return
         }
         this.cover.path = URL.createObjectURL(e.target.files[0])
         this.cover.input = files[0]
         this.cover.name = files[0].name
-      },
-
-      onChangePortraitBackground (e) {
-        this.resetError()
-
-        let files = e.target.files || e.dataTransfer.files
-        if (!files.length) {
-          return
-        }
-
-        if (!this.isValidFileType(files[0])) {
-          this.$refs.inputPortraitBackground.value = ''
-          this.errors.add({
-            field: 'portraitBackground',
-            msg: 'The portrait background file type is invalid.'
-          })
-          return
-        }
-
-        if (files[0].size > MAXIMUM_FILESIZE) {
-          this.errors.add({
-            field: 'portraitBackground',
-            msg: 'The portrait background file size can not exceed 10MB!'
-          })
-          return
-        }
-
-        this.portraitBackground.path = URL.createObjectURL(e.target.files[0])
-        this.portraitBackground.input = files[0]
-        this.portraitBackground.name = files[0].name
       },
 
       isValidFileType (file) {
@@ -963,7 +907,7 @@
     .error-box {
       line-height: 0px;
     }
-  }
+  } 
   .custom-file-label {
     @include custom-file-input();
     max-width: 300px;

@@ -8,7 +8,6 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use App\Models\MattermostUser;
-use App\Utils;
 use DB;
 use Mattermost;
 
@@ -39,14 +38,11 @@ class CreateMattermostUserEndpoint implements ShouldQueue
      */
     public function handle()
     {
-        $email = Utils::generateAutoEmail();
-        $username = Utils::generateAutoUsername($this->username);
-        $mattermostUser = Mattermost::createUserEndpoint($email, $username);
+        $mattermostUser = Mattermost::createUserEndpoint($this->email, $this->username);
 
         MattermostUser::create([
             'user_id' => $this->userId,
-            'mattermost_user_id' => $mattermostUser->id,
-            'mattermost_email' => $email
+            'mattermost_user_id' => $mattermostUser->id
         ]);
     }
 }

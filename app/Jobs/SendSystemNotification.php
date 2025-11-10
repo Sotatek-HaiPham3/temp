@@ -60,12 +60,6 @@ class SendSystemNotification implements ShouldQueue
             case Consts::NOTIFY_TYPE_TASKING_DAILY_CHECKIN:
                 SystemNotification::notifyTasking($userId, $type, $message, $props, $data);
                 break;
-            case Consts::NOTIFY_TYPE_VOICE_ROOM:
-                SystemNotification::notifyRoomActivity($userId, $type, $message, $props, $data);
-                break;
-            case Consts::NOTIFY_TYPE_COMMUNITY:
-                SystemNotification::notifyCommunityActivity($userId, $type, $message, $props, $data);
-                break;
             case Consts::NOTIFY_TYPE_OTHER:
                 SystemNotification::notifyOther($userId, $type, $message, $props, $data);
                 break;

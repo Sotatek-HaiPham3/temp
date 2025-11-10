@@ -34,7 +34,7 @@ class StripeService
 
     public function __construct()
     {
-        self::setApiKey();
+        // self::setApiKey();
     }
 
     public function getLast4NumberOfCard($paymentMethodId)

@@ -2,16 +2,12 @@
 
 namespace App\Socials;
 
-use Illuminate\Support\Arr;
 use Firebase\JWT\JWK;
 use Laravel\Socialite\Two\AbstractProvider;
-use Laravel\Socialite\Two\InvalidStateException;
 use Laravel\Socialite\Two\ProviderInterface;
 use Laravel\Socialite\Two\User;
 use Lcobucci\JWT\Parser;
 use Lcobucci\JWT\Signer\Rsa\Sha256;
-use Symfony\Component\HttpFoundation\Response;
-use Cache;
 
 class AppleProvider extends AbstractProvider implements ProviderInterface
 {
@@ -186,13 +182,6 @@ class AppleProvider extends AbstractProvider implements ProviderInterface
         return $user->setToken($token)
             ->setRefreshToken(Arr::get($response, 'refresh_token'))
             ->setExpiresIn(Arr::get($response, 'expires_in'));
-    }
-
-    public function userFromToken($token) {
-        $claims = explode('.', $token)[1];
-
-        $appleUserToken = json_decode(base64_decode($claims), true);
-        return $this->mapUserToObject($appleUserToken);
     }
 
     /**

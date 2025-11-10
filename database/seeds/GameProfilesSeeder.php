@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Seeder;
 use App\Consts;
+use App\Utils;
 
 class GameProfilesSeeder extends Seeder
 {
@@ -306,7 +307,7 @@ class GameProfilesSeeder extends Seeder
     {
         DB::table('session_reviews')->truncate();
         $now = now();
-        $nowMillis = now()->timestamp * 1000;
+        $submitAt = Utils::currentMilliseconds();
         DB::table('session_reviews')->insert([
             [
                 'object_id'         => 0,
@@ -316,7 +317,7 @@ class GameProfilesSeeder extends Seeder
                 'object_type'       => Consts::OBJECT_TYPE_SESSION,
                 'rate'              => 3,
                 'description'       => "It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).",
-                'submit_at'         => $nowMillis,
+                'submit_at'         => $submitAt,
                 'created_at'        => $now
             ],
             [
@@ -327,7 +328,7 @@ class GameProfilesSeeder extends Seeder
                 'object_type'       => Consts::OBJECT_TYPE_SESSION,
                 'rate'              => 4,
                 'description'       => "It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).",
-                'submit_at'         => $nowMillis,
+                'submit_at'         => $submitAt,
                 'created_at'        => $now
             ],
             [
@@ -338,7 +339,7 @@ class GameProfilesSeeder extends Seeder
                 'object_type'       => Consts::OBJECT_TYPE_SESSION,
                 'rate'              => 5,
                 'description'       => 'Very nice! Would play again',
-                'submit_at'         => $nowMillis,
+                'submit_at'         => $submitAt,
                 'created_at'        => $now
             ],
             [
@@ -349,7 +350,7 @@ class GameProfilesSeeder extends Seeder
                 'object_type'       => Consts::OBJECT_TYPE_SESSION,
                 'rate'              => 4,
                 'description'       => 'Very nice! Would play again',
-                'submit_at'         => $nowMillis,
+                'submit_at'         => $submitAt,
                 'created_at'        => $now
             ],
             [
@@ -360,7 +361,7 @@ class GameProfilesSeeder extends Seeder
                 'object_type'       => Consts::OBJECT_TYPE_SESSION,
                 'rate'              => 3,
                 'description'       => 'Very nice! Would play again',
-                'submit_at'         => $nowMillis,
+                'submit_at'         => $submitAt,
                 'created_at'        => $now
             ],
             [
@@ -371,7 +372,7 @@ class GameProfilesSeeder extends Seeder
                 'object_type'       => Consts::OBJECT_TYPE_SESSION,
                 'rate'              => 4,
                 'description'       => 'Very nice! Would play again',
-                'submit_at'         => $nowMillis,
+                'submit_at'         => $submitAt,
                 'created_at'        => $now
             ],
             [
@@ -382,7 +383,7 @@ class GameProfilesSeeder extends Seeder
                 'object_type'       => Consts::OBJECT_TYPE_SESSION,
                 'rate'              => 5,
                 'description'       => 'Very nice! Would play again',
-                'submit_at'         => $nowMillis,
+                'submit_at'         => $submitAt,
                 'created_at'        => $now
             ],
             [
@@ -393,7 +394,7 @@ class GameProfilesSeeder extends Seeder
                 'object_type'       => Consts::OBJECT_TYPE_SESSION,
                 'rate'              => 4,
                 'description'       => 'Very nice! Would play again',
-                'submit_at'         => $nowMillis,
+                'submit_at'         => $submitAt,
                 'created_at'        => $now
             ],
             [
@@ -404,7 +405,7 @@ class GameProfilesSeeder extends Seeder
                 'object_type'       => Consts::OBJECT_TYPE_SESSION,
                 'rate'              => 3,
                 'description'       => 'Very nice! Would play again',
-                'submit_at'         => $nowMillis,
+                'submit_at'         => $submitAt,
                 'created_at'        => $now
             ],
             [
@@ -415,7 +416,7 @@ class GameProfilesSeeder extends Seeder
                 'object_type'       => Consts::OBJECT_TYPE_SESSION,
                 'rate'              => 4,
                 'description'       => 'Very nice! Would play again',
-                'submit_at'         => $nowMillis,
+                'submit_at'         => $submitAt,
                 'created_at'        => $now
             ],
             [
@@ -426,7 +427,7 @@ class GameProfilesSeeder extends Seeder
                 'object_type'       => Consts::OBJECT_TYPE_SESSION,
                 'rate'              => 5,
                 'description'       => 'Very nice! Would play again',
-                'submit_at'         => $nowMillis,
+                'submit_at'         => $submitAt,
                 'created_at'        => $now
             ],
             [
@@ -437,7 +438,7 @@ class GameProfilesSeeder extends Seeder
                 'object_type'       => Consts::OBJECT_TYPE_SESSION,
                 'rate'              => 4,
                 'description'       => 'Very nice! Would play again',
-                'submit_at'         => $nowMillis,
+                'submit_at'         => $submitAt,
                 'created_at'        => $now
             ],
             [
@@ -448,7 +449,7 @@ class GameProfilesSeeder extends Seeder
                 'object_type'       => Consts::OBJECT_TYPE_SESSION,
                 'rate'              => 3,
                 'description'       => 'Very nice! Would play again',
-                'submit_at'         => $nowMillis,
+                'submit_at'         => $submitAt,
                 'created_at'        => $now
             ],
             [
@@ -459,7 +460,7 @@ class GameProfilesSeeder extends Seeder
                 'object_type'       => Consts::OBJECT_TYPE_SESSION,
                 'rate'              => 4,
                 'description'       => 'Very nice! Would play again',
-                'submit_at'         => $nowMillis,
+                'submit_at'         => $submitAt,
                 'created_at'        => $now
             ],
             [
@@ -470,7 +471,7 @@ class GameProfilesSeeder extends Seeder
                 'object_type'       => Consts::OBJECT_TYPE_SESSION,
                 'rate'              => 5,
                 'description'       => 'Very nice! Would play again',
-                'submit_at'         => $nowMillis,
+                'submit_at'         => $submitAt,
                 'created_at'        => $now
             ],
             [
@@ -481,7 +482,7 @@ class GameProfilesSeeder extends Seeder
                 'object_type'       => Consts::OBJECT_TYPE_SESSION,
                 'rate'              => 4,
                 'description'       => 'Very nice! Would play again',
-                'submit_at'         => $nowMillis,
+                'submit_at'         => $submitAt,
                 'created_at'        => $now
             ],
             [
@@ -492,7 +493,7 @@ class GameProfilesSeeder extends Seeder
                 'object_type'       => Consts::OBJECT_TYPE_SESSION,
                 'rate'              => 3,
                 'description'       => 'Very nice! Would play again',
-                'submit_at'         => $nowMillis,
+                'submit_at'         => $submitAt,
                 'created_at'        => $now
             ],
             [
@@ -503,7 +504,7 @@ class GameProfilesSeeder extends Seeder
                 'object_type'       => Consts::OBJECT_TYPE_SESSION,
                 'rate'              => 4,
                 'description'       => 'Very nice! Would play again',
-                'submit_at'         => $nowMillis,
+                'submit_at'         => $submitAt,
                 'created_at'        => $now
             ],
             [
@@ -514,7 +515,7 @@ class GameProfilesSeeder extends Seeder
                 'object_type'       => Consts::OBJECT_TYPE_SESSION,
                 'rate'              => 5,
                 'description'       => 'Very nice! Would play again',
-                'submit_at'         => $nowMillis,
+                'submit_at'         => $submitAt,
                 'created_at'        => $now
             ],
             [
@@ -525,7 +526,7 @@ class GameProfilesSeeder extends Seeder
                 'object_type'       => Consts::OBJECT_TYPE_SESSION,
                 'rate'              => 4,
                 'description'       => 'Very nice! Would play again',
-                'submit_at'         => $nowMillis,
+                'submit_at'         => $submitAt,
                 'created_at'        => $now
             ],
             [
@@ -536,7 +537,7 @@ class GameProfilesSeeder extends Seeder
                 'object_type'       => Consts::OBJECT_TYPE_SESSION,
                 'rate'              => 3,
                 'description'       => 'Very nice! Would play again',
-                'submit_at'         => $nowMillis,
+                'submit_at'         => $submitAt,
                 'created_at'        => $now
             ],
             [
@@ -547,7 +548,7 @@ class GameProfilesSeeder extends Seeder
                 'object_type'       => Consts::OBJECT_TYPE_SESSION,
                 'rate'              => 4,
                 'description'       => 'Very nice! Would play again',
-                'submit_at'         => $nowMillis,
+                'submit_at'         => $submitAt,
                 'created_at'        => $now
             ],
             [
@@ -558,7 +559,7 @@ class GameProfilesSeeder extends Seeder
                 'object_type'       => Consts::OBJECT_TYPE_SESSION,
                 'rate'              => 5,
                 'description'       => 'Very nice! Would play again',
-                'submit_at'         => $nowMillis,
+                'submit_at'         => $submitAt,
                 'created_at'        => $now
             ],
             [
@@ -569,7 +570,7 @@ class GameProfilesSeeder extends Seeder
                 'object_type'       => Consts::OBJECT_TYPE_SESSION,
                 'rate'              => 4,
                 'description'       => 'Very nice! Would play again',
-                'submit_at'         => $nowMillis,
+                'submit_at'         => $submitAt,
                 'created_at'        => $now
             ]
         ]);

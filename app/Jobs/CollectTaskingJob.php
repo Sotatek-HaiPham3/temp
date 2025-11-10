@@ -38,28 +38,28 @@ class CollectTaskingJob implements ShouldQueue
      */
     public function handle()
     {
-        // switch ($this->type) {
-        //     case Tasking::FOLLOW_USER:
-        //     case Tasking::CREATE_SESSION:
-        //         RankingUtils::collectUserTaskingByCode($this->userId, $this->type);
-        //         break;
-        //     case Tasking::UPLOAD_VIDEO_INTRO:
-        //     case Tasking::UPLOAD_VIDEO_DAILY:
-        //         $isCollected = RankingUtils::collectUserTaskingByCode($this->userId, Tasking::UPLOAD_VIDEO_INTRO);
-        //         if (!$isCollected) {
-        //             RankingUtils::collectUserTaskingByCode($this->userId, Tasking::UPLOAD_VIDEO_DAILY);
-        //         }
-        //         break;
-        //     case Tasking::PLAY_FREE_SESSION:
-        //     case Tasking::COMPLETE_SESSION:
-        //         $isCollected = RankingUtils::collectUserTaskingByCode($this->userId, Tasking::PLAY_FREE_SESSION);
-        //         if (!$isCollected) {
-        //             RankingUtils::collectUserTaskingByCode($this->userId, Tasking::COMPLETE_SESSION);
-        //         }
-        //         break;
-        //     default:
-        //         break;
-        // }
+        switch ($this->type) {
+            case Tasking::FOLLOW_USER:
+            case Tasking::CREATE_SESSION:
+                RankingUtils::collectUserTaskingByCode($this->userId, $this->type);
+                break;
+            case Tasking::UPLOAD_VIDEO_INTRO:
+            case Tasking::UPLOAD_VIDEO_DAILY:
+                $isCollected = RankingUtils::collectUserTaskingByCode($this->userId, Tasking::UPLOAD_VIDEO_INTRO);
+                if (!$isCollected) {
+                    RankingUtils::collectUserTaskingByCode($this->userId, Tasking::UPLOAD_VIDEO_DAILY);
+                }
+                break;
+            case Tasking::PLAY_FREE_SESSION:
+            case Tasking::COMPLETE_SESSION:
+                $isCollected = RankingUtils::collectUserTaskingByCode($this->userId, Tasking::PLAY_FREE_SESSION);
+                if (!$isCollected) {
+                    RankingUtils::collectUserTaskingByCode($this->userId, Tasking::COMPLETE_SESSION);
+                }
+                break;
+            default:
+                break;
+        }
     }
 
 }

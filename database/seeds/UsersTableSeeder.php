@@ -18,7 +18,6 @@ class UsersTableSeeder extends Seeder
         DB::table('gamelancer_available_times')->truncate();
         DB::table('user_photos')->truncate();
         DB::table('user_social_networks')->truncate();
-        DB::table('user_settings')->truncate();
         $this->createBots();
     }
 
@@ -29,12 +28,12 @@ class UsersTableSeeder extends Seeder
         $botCount = 10;
         for ($i = 1; $i < $botCount + 1; $i++) {
             $faker = Faker::create();
-            $email = "bot$i@gmail.com";
+            $email = "tester$i@gmail.com";
             DB::table('users')->insert([
                 'id'                        => $i,
                 'email'                     => $email,
                 'password'                  => $password,
-                'username'                  => "bot{$i}",
+                'username'                  => "tester{$i}",
                 'full_name'                 => $faker->name,
                 'email_verified'            => Consts::TRUE,
                 'level'                     => 0,
@@ -42,12 +41,16 @@ class UsersTableSeeder extends Seeder
                 'user_type'                 => $i <= 5 ? 0 : 1,
                 'dob'                       => $faker->dateTime(),
                 'status'                    => Consts::USER_ACTIVE,
+                'rating'                    => 0,
                 'languages'                 => 'en',
                 'description'               => $faker->text(),
+                'number_reviewer'           => 0,
+                'price'                     => 10.37,
                 'remember_token'            => str_random(10)
             ]);
             $this->createBalance($i);
             $this->createUserSettings($i);
+            DB::table('user_statistics')->insert(['user_id' => $i]);
             if ($i > 5) {
                 $this->createAvailableTime($i);
                 $this->createUserPhoto($i);
@@ -74,7 +77,7 @@ class UsersTableSeeder extends Seeder
 
     private function createAvailableTime($userId)
     {
-        for ($i=0; $i < 7; $i++) {
+        for ($i = 0; $i < 7; $i++) {
             DB::table('gamelancer_available_times')->insert([
                 'user_id'           => $userId,
                 'weekday'           => $i,

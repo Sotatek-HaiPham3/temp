@@ -95,7 +95,7 @@ class GameProfile extends Model
     public function game()
     {
         return $this->belongsTo('App\Models\Game')
-            ->select('id', 'title', 'slug', 'logo', 'thumbnail', 'portrait', 'cover', 'is_active', 'ios_app_id', 'android_app_id');
+            ->select('id', 'title', 'slug', 'logo', 'thumbnail', 'portrait', 'cover', 'is_active');
     }
 
     public function canDeleteGameprofile()

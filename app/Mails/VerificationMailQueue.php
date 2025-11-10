@@ -19,11 +19,13 @@ class VerificationMailQueue extends Mailable
 
     protected $user;
     protected $userLocale;
+    protected $input;
 
-    public function __construct($user, $userLocale)
+    public function __construct($user, $userLocale, $input)
     {
         $this->user = $user;
         $this->userLocale = $userLocale;
+        $this->input = $input;
     }
 
     /**
@@ -39,6 +41,7 @@ class VerificationMailQueue extends Mailable
                     ->with([
                         'email' => $this->user->email,
                         'code'  => $this->user->email_verification_code,
+                        'vip' => !empty($this->input['vip']),
                         'userLocale' => $this->userLocale,
                         'userName' => $this->user->username
                     ]);

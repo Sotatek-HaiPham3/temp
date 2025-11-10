@@ -1,7 +1,7 @@
 <template>
   <div class="boxCore" id="user_information">
     <section class="clearfix">
-
+      
     <div class="filter_container clearfix">
       <span class="search_box">
         <input type="text" placeholder="Search"v-on:keyup.enter="search" class="form-control search_input" name="searchKey" v-model="searchKey"/>
@@ -17,8 +17,14 @@
           <th class="cl2 text-left">Contact</th>
           <th class="cl3 text-left" data-sort-field="dob">Date of Birth</th>
           <th class="cl3 text-left" data-sort-field="sex">Gender</th>
+          <th class="cl3 text-left" data-sort-field="sex">Rank</th>
+          <th class="cl3 text-left" data-sort-field="sex">Registration Type</th>
+          <th class="cl4 text-left" data-sort-field="user_type">User Type</th>
+          <th class="cl3 text-left" data-sort-field="is_vip">V.I.P</th>
           <th class="cl5 text-left" data-sort-field="status">{{ $t('user.status') }}</th>
           <th class="cl6 text-right">Action</th>
+          <!-- <th class="cl10" >Action</th>
+          <th class="cl11" >{{ $t('user.login_history') }}</th> -->
           <template slot="body" slot-scope="props">
             <template v-if="rows[ props.index ].editable === false">
               <tr>
@@ -35,7 +41,21 @@
                 <td class="cl5 text-left">
                   {{ props.item.dob }}
                 </td>
-                <td class="cl5 text-left">{{ props.item.sex | formatSex }}</td>
+                <td class="cl5 text-left" v-if="props.item.sex === 0">Female</td>
+                <td class="cl5 text-left" v-else-if="props.item.sex === 1">Male</td>
+                <td class="cl5 text-left" v-else>Non-binary</td>
+                <td class="cl5 text-left">
+                  {{ props.item.user_ranking && props.item.user_ranking.ranking ? props.item.user_ranking.ranking.name : 'Iron' }}
+                </td>
+                <td class="cl5 text-left">
+                  {{ (props.item.social_user ? props.item.social_user.provider : 'Normal') | uppercaseFirst }}
+                </td>
+                <td class="cl4 text-left" v-if="props.item.user_type === 1">Premium Gamelancer</td>
+                <td class="cl4 text-left" v-else-if="props.item.user_type === 2">Free Gamelancer</td>
+                <td class="cl4 text-left" v-else>User</td>
+                <td class="cl5 text-left">
+                  {{ props.item.is_vip === 1 ? 'User V.I.P' : 'User Normal'}}
+                </td>
                 <td class="cl5 text-left">
                   {{ props.item.status | uppercaseFirst }}
                 </td>
@@ -62,7 +82,27 @@
                   {{ props.item.dob }}
                 </td>
                 <td class="cl5 text-left">
-                  {{ props.item.sex | formatSex }}
+                  {{ props.item.sex === 1 | formatSex }}
+                </td>
+                <td class="cl5 text-left">
+                  {{ props.item.user_ranking ? props.item.user_ranking.ranking.name : 'Unranked' }}
+                </td>
+                <td class="cl5 text-left">
+                  {{ props.item.social_user ? 'Social' : 'Normal' }}
+                </td>
+                <td class="cl4 text-left">
+                  <template v-if="props.item.user_type === 1">Premium Gamelancer</template>
+                  <select v-else name="user_type" v-model="params.user_type">
+                    <option value=0 v-if="props.item.user_type === 0">User</option>
+                    <option value=2>Free Gamelancer</option>
+                    <option value=1>Premium Gamelancer</option>
+                  </select>
+                </td>
+                <td class="cl5 text-left">
+                  <select name="is_vip" v-model="params.is_vip">
+                    <option value="0">User Normal</option>
+                    <option value="1">User V.I.P</option>
+                  </select>
                 </td>
                 <td class="cl5 text-left">
                   <select name="status" v-model="params.status">
@@ -129,23 +169,9 @@
         return val ? val.substring(0, 10) : '';
       },
       formatSex: function (val) {
-        if (val === 'female') {
-          return 'Female'
-        }
-
-        if (val === 'male') {
-          return 'Male'
-        }
-
-        if (val === 'non_binary') {
-          return 'Non-binary'
-        }
-
-        if (val === 'not_say') {
-          return 'Not to say'
-        }
-
-        return 'Not Specified'
+        if(val == 1)
+          return 'Male';
+        else return 'Female';
       },
       statusLabel: function (val) {
         if(val === 'inactive') return window.i18n.t('user.inactive');
@@ -199,6 +225,10 @@
           return;
         }
 
+        // await this.$validator.validate('level'); 
+        // if (this.errors.any()) {
+        //   return;
+        // }
         this.isLoading = true;
         this.updateUser();
 
@@ -231,7 +261,7 @@
 
       refresh() {
         this.$refs.datatable.refresh();
-      }
+      },
     },
 
     mounted() {
@@ -468,7 +498,7 @@
           }
         }
         tr {
-          .btn_update_user:active,.btn_update_user:hover,
+          .btn_update_user:active,.btn_update_user:hover, 
           .btn_save_user:active, .btn_save_user:hover {
             background-color: $color_eden;
             color: $color_white;

@@ -25,8 +25,7 @@ class ReportRequest extends FormRequest
     {
         return [
             'report_user_id' => 'required|exists:users,id',
-            'reason_id' => 'required|exists:reasons,id',
-            'details' => 'nullable|string|max:500|min:24'
+            'reason' => 'required'
         ];
     }
 }

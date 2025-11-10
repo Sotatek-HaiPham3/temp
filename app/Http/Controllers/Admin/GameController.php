@@ -23,7 +23,7 @@ class GameController extends AppBaseController
     {
         $this->adminService = $adminService;
     }
-
+    
     public function getGames(Request $request) {
         DB::beginTransaction();
         try {

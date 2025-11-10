@@ -162,28 +162,4 @@ export default class SettingRequest extends BaseRequest {
         return this.post(url, params)
     }
 
-    getVoiceGroupRole (params) {
-        let url = '/admin/api/setting/room/manager/role'
-        return this.get(url, params)
-    }
-
-    createVoiceGroupRole (params) {
-        let url = '/admin/api/setting/room/manager/make-role'
-        return this.post(url, params)
-    }
-
-    deleteVoiceGroupRole (params) {
-        let url = '/admin/api/setting/room/manager/remove-role'
-        return this.del(url, params)
-    }
-
-    getSmsSetting (params) {
-        let url = '/admin/api/setting/sms'
-        return this.get(url, params)
-    }
-
-    updateSmsSetting (params) {
-        let url = '/admin/api/setting/sms/update'
-        return this.put(url, params)
-    }
 }

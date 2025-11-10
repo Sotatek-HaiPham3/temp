@@ -10,6 +10,9 @@ use App\Models\User;
 use Faker\Factory as Faker;
 use DB;
 use App\Jobs\CreateMattermostUserEndpoint;
+use App\Jobs\CreateNodebbUserEndpoint;
+use Nodebb;
+use App\Models\NodebbUser;
 use App\Models\MattermostUser;
 use Mattermost;
 
@@ -63,7 +66,7 @@ class FakeUsersCommand extends Command
     private function createBots()
     {
         $password = bcrypt('123123');
-        $prefix   = 'gl_tester';
+        $prefix   = 'glm_tester';
 
         $botCount = 50;
         $lastId = DB::table('users')->orderBy('id', 'desc')->value('id');
@@ -82,7 +85,7 @@ class FakeUsersCommand extends Command
                 'full_name'                 => $faker->name,
                 'email_verified'            => Consts::TRUE,
                 'level'                     => 0,
-                'sex'                       => array_rand([Consts::GENDER_FEMALE, Consts::GENDER_MALE, Consts::GENDER_NON_BINARY, Consts::GENDER_NOT_SAY]),
+                'sex'                       => rand(0, 1),
                 'user_type'                 => $i <= 5 ? 0 : 1,
                 'dob'                       => $faker->dateTime(),
                 'status'                    => Consts::USER_ACTIVE,
@@ -91,12 +94,13 @@ class FakeUsersCommand extends Command
                 'remember_token'            => str_random(10)
             ]);
             $this->createBalance($userId);
-	    $this->createUserSettings($userId);
-	    $this->createUserStatistics($userId);
+            $this->createUserSettings($userId);
+            DB::table('user_statistics')->insert(['user_id' => $userId]);
+logger()->info("======= Created User: {$userId} - {$username}");
+            // $this->createNodeBBUser($userId, $email, $username);
+            $this->createMattermostUser($userId, $email, $username);
 
-            $this->createMattermostUser($userId, $username);
-
-            logger()->info("======= Created User: {$userId} - {$username}");
+            // logger()->info("======= Created User: {$userId} - {$username}");
         }
     }
 
@@ -117,22 +121,23 @@ class FakeUsersCommand extends Command
         ]);
     }
 
-    private function createUserStatistics($userId)
+    private function createNodeBBUser($userId, $email, $username)
     {
-        DB::table('user_statistics')->insert([
-            'user_id' => $userId
+        $nodebbUser = Nodebb::createUserEndpoint($email, $username);
+
+        NodebbUser::create([
+            'user_id' => $userId,
+            'nodebb_user_id' => $nodebbUser->payload->uid,
         ]);
     }
 
-    private function createMattermostUser($userId, $username)
+    private function createMattermostUser($userId, $email, $username)
     {
-	    $email = strtolower(Utils::generateAutoEmail());
         $mattermostUser = Mattermost::createUserEndpoint($email, $username);
 
         MattermostUser::create([
             'user_id' => $userId,
-	    'mattermost_user_id' => $mattermostUser->id,
-	    'mattermost_email' => $email
+            'mattermost_user_id' => $mattermostUser->id
         ]);
     }
 }

@@ -4,18 +4,6 @@ namespace App\Http\Services;
 
 use App\Consts;
 
-use App\Events\UserAddFriendUpdated;
-use App\Events\UserBlocked;
-use App\Events\UserUnblocked;
-use App\Events\UserFollowingUpdated;
-use App\Events\UserUnfollowUpdated;
-use App\Events\UserUnfriendUpdated;
-use App\Exceptions\Reports\PhoneNumberNotSupportedException;
-use App\Mails\ResetPasswordCodeMail;
-use App\Models\Community;
-use App\Models\CommunityMember;
-use App\Models\SocialUser;
-use App\Models\UserBlockList;
 use App\Models\UserDeviceRegister;
 use App\Models\UserBalance;
 use DateTime;
@@ -39,7 +27,6 @@ use App\Utils;
 use App\PhoneUtils;
 use App\Utils\BalanceUtils;
 use App\Utils\ChatUtils;
-use App\Utils\CommunityUtils;
 use App\Events\BalanceUpdated;
 use App\Events\UserUpdated;
 use App\Events\UserProfileUpdated;
@@ -72,8 +59,8 @@ use App\Models\TaskingReward;
 use App\Models\CollectingTasking;
 use App\Models\CollectingTaskingReward;
 use App\Models\UserRanking;
-use App\Models\VoiceChatRoomUser;
 use App\Jobs\CalculateUserFollow;
+use App\Jobs\PushAcountInfoHubSpotJob;
 use App\Jobs\GenerateInvitationCodeJob;
 use App\Jobs\AddKlaviyoMailList;
 use App\Jobs\CollectTaskingJob;
@@ -83,8 +70,6 @@ use App\Mails\VerificationChangeUsernameQueue;
 use App\Mails\VerificationChangePhoneNumberQueue;
 use App\Mails\VerificationMailQueue;
 use App\Mails\OtpMailQueue;
-use App\Mails\AuthorizationMailQueue;
-use App\Mails\ChangePasswordMail;
 use App\Exceptions\Reports\ChangeEmailException;
 use App\Exceptions\Reports\ChangeUsernameException;
 use App\Exceptions\Reports\ChangePhoneNumberException;
@@ -93,9 +78,6 @@ use App\Exceptions\Reports\InvalidActionException;
 use App\Exceptions\Reports\ChangeConcurrentlyEmailOrPhoneOrUsernameException;
 use App\Exceptions\Reports\InvalidBalanceException;
 use App\Exceptions\Reports\AccountNotActivedException;
-use App\Exceptions\Reports\SecurityException;
-use App\Exceptions\Reports\InvalidCodeException;
-use App\Exceptions\Reports\InvalidDataException;
 use Validator;
 use Mattermost;
 use SystemNotification;
@@ -105,8 +87,8 @@ use App\Utils\TimeUtils;
 use App\Utils\RankingUtils;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Nodebb;
 use App\Jobs\SendSystemNotification;
-use Socialite;
 
 class UserService extends BaseService
 {
@@ -223,18 +205,15 @@ class UserService extends BaseService
     public function getUserProfile($userId, $loadRelation = true)
     {
         $user = User::withoutAppends()->with([
-                'availableTimes', 'socialNetworks', 'photos', 'idols', 'fans', 'settings', 'statistic', 'personality',
-                'visibleSettings', 'emailChanging', 'phoneChanging', 'phoneChangeCode'
+            'availableTimes', 'socialNetworks', 'photos', 'idols', 'fans', 'settings', 'statistic', 'personality',
+            'visibleSettings', 'emailChanging', 'phoneChanging', 'phoneChangeCode', 'socialUser'
             ])
             ->leftJoin('user_rankings', 'user_rankings.user_id', 'users.id')
-            ->leftJoin('voice_group_managers', 'voice_group_managers.user_id', 'users.id')
             ->where('users.id', $userId)
             ->select('users.id', 'users.email', 'users.username', 'users.email_verified', 'users.phone_number',
                 'users.phone_verified', 'users.phone_country_code', 'users.level', 'users.avatar', 'users.description',
                 'users.languages', 'users.last_time_active', 'users.user_type', 'users.is_vip', 'users.sex', 'users.dob',
-                'users.phone_verify_code', 'user_rankings.ranking_id', 'user_rankings.total_exp', 'user_rankings.intro_step', 'users.deleted_at', 'users.status',
-                DB::raw('(CASE WHEN voice_group_managers.deleted_at IS NULL THEN voice_group_managers.role ELSE NULL END) AS voice_group_role'),
-                DB::raw('(CASE WHEN users.password IS NULL THEN 0 ELSE 1 END) AS password_filled')
+                'users.phone_verify_code', 'user_rankings.ranking_id', 'user_rankings.total_exp', 'user_rankings.intro_step'
             )
             ->first();
 
@@ -242,9 +221,22 @@ class UserService extends BaseService
             'user_id' => $user->mattermostUser->user_id,
             'chat_user_id' => $user->mattermostUser->mattermost_user_id
         ];
-        unset($user->mattermostUser);
 
-        $user->is_social_user = !empty($user->socialUser);
+        if (!empty($user->nodebbUser)) {
+            $user->forum_user = [
+                'user_id' => $user->nodebbUser->user_id,
+                'forum_user_id' => $user->nodebbUser->nodebb_user_id
+            ];
+        }
+
+        $user->is_social_user = false;
+        if (!empty($user->socialUser)) {
+            $user->is_social_user = true;
+        }
+
+        unset($user->nodebbUser);
+        unset($user->mattermostUser);
+        unset($user->socialUser);
 
         $personality = [];
         $user->personality->groupBy('review_tag_id')
@@ -264,19 +256,13 @@ class UserService extends BaseService
         $user->tagStatistic = $personality;
         unset($user->personality);
 
-        $user->blocked_users = $this->getUserBlocklists($user->id);
-
-        $user->communities = CommunityMember::where('user_id', $user->id)->pluck('community_id');
-
-        $user->communities_available = $this->getCommunityAvailable($user->id);
-
-        $user->email = Utils::removeUserAutoEmail($user->email);
-
         return $user;
     }
 
     public function getVisibleSettings($userId) {
-        $user = UserSetting::select('id', 'visible_age', 'visible_gender', 'visible_following', 'online', 'cover');
+        $user = UserSetting::select('id', 'visible_age', 'visible_gender', 'visible_following', 'online', 'cover')
+            ->where('id', $userId)
+            ->first();
         return $user;
     }
 
@@ -310,7 +296,7 @@ class UserService extends BaseService
         event(new UserUpdated($userId));
         event(new UserProfileUpdated($userId));
 
-        return [];
+        return 'Ok';
     }
 
     private function saveUserSocialNetwork($params)
@@ -425,14 +411,21 @@ class UserService extends BaseService
             'idols', 'fans', 'userRanking'])
             ->leftJoin('user_rankings', 'user_rankings.user_id', 'users.id')
             ->select('users.id', 'users.email', 'users.username', 'users.level', 'users.dob', 'users.sex', 'users.avatar', 'users.audio', 'users.description', 'users.languages',
-                'users.last_time_active', 'users.user_type', 'users.is_vip', 'user_rankings.ranking_id', 'users.status', 'users.deleted_at')
+                'users.last_time_active', 'users.user_type', 'users.is_vip', 'user_rankings.ranking_id')
             ->where('users.username', $username)
-            ->whereIn('users.status', [Consts::USER_ACTIVE, Consts::USER_DELETED])
+            ->where('users.status', Consts::USER_ACTIVE)
             ->first();
 
         if (!$user) {
             return null;
         }
+
+        $user->forum_user = [
+            'user_id' => null,
+            'forum_user_id' => null
+        ];
+
+        unset($user->nodebbUser);
 
         $personality = [];
         $user->personality->groupBy('review_tag_id')
@@ -448,15 +441,7 @@ class UserService extends BaseService
 
         $user->email = Utils::concealEmail($user->email);
 
-        $user->blocked_users = $this->getUserBlocklists($user->id);
-
-        $user->communities = CommunityMember::where('user_id', $user->id)->pluck('community_id');
-
-        $user->communities_available = $this->getCommunityAvailable($user->id);
-
-        $user->email = Utils::removeUserAutoEmail($user->email);
-
-        return $user;
+        return $user->toArray();
     }
 
     public function getAvailableTimes($userId, $timeoffset)
@@ -549,7 +534,7 @@ class UserService extends BaseService
             ->select('session_reviews.id', 'session_reviews.reviewer_id', 'games.title as game_title' ,'session_reviews.rate', 'session_reviews.object_type', 'session_reviews.description', 'session_reviews.recommend', 'session_reviews.created_at')
             ->where('object_type', Consts::OBJECT_TYPE_BOUNTY)
             ->where('session_reviews.user_id', $userId);
-
+        
         return $userReviewSession
             ->union($userReviewBounty)
             ->orderBy('id', 'desc')
@@ -568,7 +553,6 @@ class UserService extends BaseService
         return UserFollowing::with(['idol'])
             ->where('user_id', $params['user_id'])
             ->where('is_following', Consts::TRUE)
-            ->orderBy('updated_at', 'asc')
             ->paginate(array_get($params, 'limit', Consts::DEFAULT_PER_PAGE));
     }
 
@@ -577,53 +561,31 @@ class UserService extends BaseService
         return UserFollowing::with(['fan'])
             ->where('following_id', $params['user_id'])
             ->where('is_following', Consts::TRUE)
-            ->orderBy('updated_at', 'asc')
             ->paginate(array_get($params, 'limit', Consts::DEFAULT_PER_PAGE));
-    }
-
-    public function getInfoMyIdolByFollowingId($userId, $followingId)
-    {
-        return UserFollowing::with(['idol'])->where('user_id', $userId)->where('following_id', $followingId)->first();
-    }
-
-    public function getInfoIdolAndFanByFollowingId($userId, $followingId) {
-        return UserFollowing::with(['idol', 'fan'])->where('user_id', $userId)->where('following_id', $followingId)->first();
     }
 
     public function addOrRemoveFollow($followingId, $isFollowing = Consts::TRUE)
     {
         $followerId = Auth::id();
-        if ($followerId === $followingId) {
-            throw new InvalidRequestException('exceptions.cannot_follow_yoursefl');
-        }
-
-        $userBlockList = $this->getUserBlocklists($followerId);
-        if ($isFollowing && in_array($followingId, $userBlockList->toArray())) {
-            throw new InvalidRequestException('exceptions.cannot_follow_block_user');
-        }
-
         $follow = UserFollowing::firstOrNew(['user_id' => $followerId, 'following_id' => $followingId]);
         $follow->is_following = $isFollowing;
         $follow->save();
 
         if ($isFollowing) {
-            $isFriend = UserFollowing::where('user_id', $followingId)
-                ->where('following_id', $followerId)
-                ->where('is_following', Consts::TRUE)
-                ->exists();
-            $this->sendNotificationToFollower($follow, $isFriend);
-            // $this->sendNotificationToFan($follow, $isFriend);
+            $user = User::select('id', 'username', 'sex', 'avatar')
+                ->where('id', $followerId)
+                ->first();
 
-            // CollectTaskingJob::dispatch($followerId, Tasking::FOLLOW_USER);
-            event(new UserFollowingUpdated($this->getInfoMyIdolByFollowingId($followerId, $followingId)));
-            if ($isFriend) {
-                event(new UserAddFriendUpdated($followerId, $this->getInfoIdolAndFanByFollowingId($followerId, $followingId)));
-                event(new UserAddFriendUpdated($followingId, $this->getInfoIdolAndFanByFollowingId($followerId, $followingId)));
-            }
-        } else {
-            event(new UserUnfollowUpdated($this->getInfoMyIdolByFollowingId($followerId, $followingId)));
-            event(new UserUnfriendUpdated($followerId, $this->getInfoIdolAndFanByFollowingId($followerId, $followingId)));
-            event(new UserUnfriendUpdated($followingId, $this->getInfoIdolAndFanByFollowingId($followerId, $followingId)));
+            $notificationParams = [
+                'user_id' => $followingId,
+                'type' => Consts::NOTIFY_TYPE_NEW_FOLLOWER,
+                'message' => Consts::NOTIFY_NEW_FOLLOW,
+                'props' => [],
+                'data' => ['user' => (object) ['id' => $followerId]]
+            ];
+            $this->fireNotification(Consts::NOTIFY_TYPE_OTHER, $notificationParams);
+
+            CollectTaskingJob::dispatch($followerId, Tasking::FOLLOW_USER);
         }
 
         dispatch(new CalculateUserFollow($followerId, $followingId));
@@ -631,28 +593,79 @@ class UserService extends BaseService
         return $follow;
     }
 
-    private function sendNotificationToFollower($follow, $isFriend)
+    public function changeEmailFromSetting($newEmail)
     {
-        $notificationParams = [
-            'user_id' => $follow->following_id,
-            'type' => Consts::NOTIFY_TYPE_NEW_FOLLOWER,
-            'message' => $isFriend ? Consts::NOTIFY_NEW_FOLLOW_FRIEND : Consts::NOTIFY_NEW_FOLLOW,
-            'props' => [],
-            'data' => ['user' => (object) ['id' => $follow->user_id]]
-        ];
-        $this->fireNotification(Consts::NOTIFY_TYPE_OTHER, $notificationParams);
+        $user = Auth::user();
+
+        $this->validateChangeEmailOrPhoneOrUsername($user);
+
+        $code = Utils::generateRandomString(Consts::VERIFY_CODE_LENGTH, Consts::VERIFY_CODE_STRING);
+        $changeEmailHistory = ChangeEmailHistory::create([
+            'user_id' => $user->id,
+            'old_email' => $user->email,
+            'new_email' => strtolower($newEmail),
+            'email_verification_code' => $code,
+            'email_verification_code_created_at' => Carbon::now(),
+        ]);
+        \Mail::queue(new VerificationChangeMailQueue($changeEmailHistory, $user->username, Consts::DEFAULT_LOCALE));
+
+        event(new UserUpdated($user->id));
+
+        return $changeEmailHistory;
     }
 
-    private function sendNotificationToFan($follow, $isFriend)
+    public function changeEmailFromSettingWithoutVerifiedAccount($newEmail)
     {
-        $notificationParams = [
-            'user_id' => $follow->user_id,
-            'type' => Consts::NOTIFY_TYPE_NEW_FOLLOWING,
-            'message' => $isFriend ? Consts::NOTIFY_NEW_FOLLOWING_FRIEND : Consts::NOTIFY_NEW_FOLLOWING,
-            'props' => [],
-            'data' => ['user' => (object) ['id' => $follow->following_id]]
-        ];
-        $this->fireNotification(Consts::NOTIFY_TYPE_OTHER, $notificationParams);
+        $user = Auth::user();
+
+        $this->validateChangeEmailOrPhoneOrUsername($user);
+
+        $oldEmail = $user->email;
+        $code = Utils::generateRandomString(Consts::VERIFY_CODE_LENGTH, Consts::VERIFY_CODE_STRING);
+
+        $changeEmailHistory = ChangeEmailHistory::create([
+            'user_id' => $user->id,
+            'old_email' => $oldEmail,
+            'new_email' => strtolower($newEmail),
+            'email_verified' => Consts::TRUE,
+            'without_verified_account' => Consts::TRUE
+        ]);
+
+        $user->email = $changeEmailHistory->new_email;
+        $user->email_verification_code = $code;
+        $user->save();
+
+        $changeEmailHistory->delete();
+
+        Mattermost::updateEmailUser($user->mattermostUser->mattermost_user_id, $oldEmail, $user->email);
+        Nodebb::updateEmail($user->nodebbUser->nodebb_user_id, $user->email);
+        \Mail::queue(new VerificationMailQueue($user, Consts::DEFAULT_LOCALE, $newEmail));
+
+        PushAcountInfoHubSpotJob::dispatch($user);
+        event(new UserUpdated($user->id));
+        event(new EmailChanged($user->id, 'success'));
+
+        return $changeEmailHistory;
+    }
+
+    public function resendCodeChangeEmail($email)
+    {
+        $user = Auth::user();
+        $changeEmailHistory = ChangeEmailHistory::where('old_email', $user->email)
+            ->where('new_email', $email)
+            ->where('email_verified', Consts::FALSE)
+            ->orderBy('id', 'desc')
+            ->first();
+        if (!$changeEmailHistory) {
+            throw new ChangeEmailException('auth.verify.email_invalid');
+        }
+        $code = Utils::generateRandomString(Consts::VERIFY_CODE_LENGTH, Consts::VERIFY_CODE_STRING);
+        $changeEmailHistory->email_verification_code = $code;
+        $changeEmailHistory->email_verification_code_created_at = Carbon::now();
+        $changeEmailHistory->save();
+
+        \Mail::queue(new VerificationChangeMailQueue($changeEmailHistory, $user->username, Consts::DEFAULT_LOCALE));
+        return $changeEmailHistory;
     }
 
     public function verifyChangeEmail($input)
@@ -683,6 +696,10 @@ class UserService extends BaseService
         $changeEmailHistory->save();
         $changeEmailHistory->delete();
 
+        Mattermost::updateEmailUser($user->mattermostUser->mattermost_user_id, $oldEmail, $newEmail);
+        Nodebb::updateEmail($user->nodebbUser->nodebb_user_id, $newEmail);
+
+        PushAcountInfoHubSpotJob::dispatch($user);
         event(new UserUpdated($user->id));
         event(new EmailChanged($user->id, 'success'));
 
@@ -698,8 +715,6 @@ class UserService extends BaseService
         $userData = ChatUtils::getUserDataToCache($userId);
         ChatUtils::updateChannelMembers($userData);
 
-        // save new info of user to cache for community.
-        CommunityUtils::updateAllChannelMembers($userId);
         event(new UserUpdated($userId));
         event(new UserProfileUpdated($userId));
         event(new UserSettingsUpdated($userId));
@@ -707,23 +722,17 @@ class UserService extends BaseService
         return $settings;
     }
 
-    public function getUserSettings($userId)
-    {
-        return UserSetting::where(['id' => $userId])->first();
-    }
-
     public function updateProfile($userId, $params)
     {
+        $dob = array_get($params, 'dob');
         $user = User::find($userId);
-
-        $oldUsername = $user->username;
-
         $user->languages = array_get($params, 'languages', $user->languages);
         $user->description = array_get($params, 'description', $user->description);
         $user->avatar = array_get($params, 'avatar', $user->avatar);
         $user->sex = array_get($params, 'sex', $user->sex);
-        $user->dob = array_get($params, 'dob', Carbon::createFromFormat('Y-m-d', $user->dob)->format('d/m/Y'));
-        $user->username = array_get($params, 'username', $user->username);
+        if ($dob) {
+            $user->dob = $dob;
+        }
 
         if ($user->isDirty()) {
             $user->save();
@@ -732,23 +741,22 @@ class UserService extends BaseService
         event(new UserUpdated($userId));
         event(new UserProfileUpdated($userId));
 
-        // save new info of user to cache for direct message.
+        // save new info of user to cache.
         $userData = ChatUtils::getUserDataToCache($userId);
         ChatUtils::updateChannelMembers($userData);
 
-        // save new info of user to cache for community.
-        CommunityUtils::updateAllChannelMembers($userId);
-
-        if ($user->username !== $oldUsername) {
-            $data = [
-                'user_id'        => $user->id,
-                'old_username'   => $oldUsername,
-                'username'       => $user->username
-            ];
-            event(new UsernameChanged($data));
-        }
-
         return $user;
+    }
+
+    public function cancelChangeEmail()
+    {
+        ChangeEmailHistory::where('user_id', Auth::id())
+            ->where('email_verified', Consts::FALSE)
+            ->whereNull('deleted_at')
+            ->first()
+            ->delete();
+        event(new UserUpdated(Auth::id()));
+        return 'ok';
     }
 
     public function getGamelancerInfo($userId)
@@ -835,26 +843,13 @@ class UserService extends BaseService
 
     public function report($input)
     {
-        $userId = Auth::id();
-        if ($this->checkReportExisted($userId, $input['report_user_id'])) {
-            throw new InvalidRequestException('exceptions.already_report_user');
-        }
-
-        return UserReport::create([
-            'user_id' => $userId,
+        $report = UserReport::create([
+            'user_id' => Auth::id(),
             'report_user_id' => $input['report_user_id'],
-            'reason_id' => $input['reason_id'],
-            'details' => array_get($input, 'details'),
-            'status' => Consts::REPORT_STATUS_PROCESSING
+            'reason' => $input['reason']
         ]);
-    }
 
-    public function checkReportExisted($userId, $reportUserId)
-    {
-        return UserReport::where('user_id', $userId)
-            ->where('report_user_id', $reportUserId)
-            ->where('status', Consts::REPORT_STATUS_PROCESSING)
-            ->exists();
+        return $report;
     }
 
     public function createInterestsGames($params)
@@ -890,8 +885,8 @@ class UserService extends BaseService
     {
         return UserInterestsGame::where(
             [
-                'user_id' => Auth::id(),
-                'game_id' => array_get($param, 'game_id'),
+                'user_id' => Auth::id(), 
+                'game_id' => array_get($param, 'game_id'), 
                 'game_name' => array_get($param, 'game_name')
             ]
         )
@@ -947,6 +942,51 @@ class UserService extends BaseService
             ->paginate(array_get($params, 'limit', Consts::DEFAULT_PER_PAGE));
     }
 
+    public function changeUsernameFromSetting($newUsername)
+    {
+        $user = Auth::user();
+
+        $this->validateChangeEmailOrPhoneOrUsername($user);
+
+        $code = Utils::generateRandomString(Consts::VERIFY_CODE_LENGTH, Consts::VERIFY_CODE_STRING);
+        $key = sprintf('%s%s%s%s', $newUsername, $user->username, Carbon::now(), $code);
+        $changeUsernameHistory = ChangeUsernameHistory::create([
+            'user_id' => $user->id,
+            'old_username' => $user->username,
+            'new_username' => $newUsername,
+            'verification_code' => gamelancer_hash($key),
+            'verification_code_created_at' => Carbon::now(),
+        ]);
+
+        $this->sendVerifyCodeChangeUsername($user, $changeUsernameHistory);
+        event(new UserUpdated($user->id));
+
+        return $changeUsernameHistory;
+    }
+
+    public function resendLinkChangeUsername($newUsername)
+    {
+        $user = Auth::user();
+        $changeUsernameHistory = ChangeUsernameHistory::where('old_username', $user->username)
+            ->where('new_username', $newUsername)
+            ->where('verified', Consts::FALSE)
+            ->orderBy('id', 'desc')
+            ->first();
+
+        if (!$changeUsernameHistory) {
+            throw new ChangeUsernameException('auth.verify.username_invalid');
+        }
+
+        $code = Utils::generateRandomString(Consts::VERIFY_CODE_LENGTH, Consts::VERIFY_CODE_STRING);
+        $key = sprintf('%s%s%s%s', $changeUsernameHistory->new_username, $changeUsernameHistory->old_username, Carbon::now(), $code);
+        $changeUsernameHistory->verification_code = gamelancer_hash($key);
+        $changeUsernameHistory->verification_code_created_at = Carbon::now();
+        $changeUsernameHistory->save();
+
+        $this->sendVerifyCodeChangeUsername($user, $changeUsernameHistory);
+        return $changeUsernameHistory;
+    }
+
     private function sendVerifyCodeChangeUsername($user, $changeUsernameHistory)
     {
         if ($user->isAccountVerified() && $user->hasVerifiedEmail()) {
@@ -999,6 +1039,9 @@ class UserService extends BaseService
         $userData = ChatUtils::getUserDataToCache($userId);
         ChatUtils::updateUserInfo($userData);
 
+        Nodebb::updateUsername($user->nodebbUser->nodebb_user_id, $newUsername);
+
+        PushAcountInfoHubSpotJob::dispatch($user);
         event(new UserUpdated($user->id));
         $data = [
             'user_id'        => $user->id,
@@ -1008,6 +1051,101 @@ class UserService extends BaseService
         event(new UsernameChanged($data));
 
         return $changeUsernameHistory;
+    }
+
+    public function cancelChangeUsername()
+    {
+        ChangeUsernameHistory::where('user_id', Auth::id())
+            ->where('verified', Consts::FALSE)
+            ->whereNull('deleted_at')
+            ->first()->delete();
+        event(new UserUpdated(Auth::id()));
+        return 'ok';
+    }
+
+    public function changePhoneNumberFromSetting($newPhoneNumber, $newPhoneCountryCode)
+    {
+        $user = Auth::user();
+        $this->validateChangeEmailOrPhoneOrUsername($user);
+
+        $newPhoneNumber = PhoneUtils::makePhoneNumber($newPhoneNumber, $newPhoneCountryCode);
+
+        $code = Utils::generateRandomString(Consts::VERIFY_CODE_LENGTH, Consts::VERIFY_CODE_STRING);
+        $changePhoneNumberHistory = ChangePhoneNumberHistory::create([
+            'user_id' => $user->id,
+            'old_phone_number' => $user->phone_number,
+            'new_phone_number' => $newPhoneNumber,
+            'new_phone_country_code' => $newPhoneCountryCode
+        ]);
+
+        event(new UserUpdated($user->id));
+
+        return $changePhoneNumberHistory;
+    }
+
+    public function changePhoneNumberFromSettingWithoutVerifiedAccount($newPhoneNumber, $newPhoneCountryCode)
+    {
+        $user = Auth::user();
+        $this->validateChangeEmailOrPhoneOrUsername($user);
+
+        $newPhoneNumber = PhoneUtils::makePhoneNumber($newPhoneNumber, $newPhoneCountryCode);
+
+        $changePhoneNumberHistory = ChangePhoneNumberHistory::create([
+            'user_id' => $user->id,
+            'old_phone_number' => $user->phone_number,
+            'new_phone_number' => $newPhoneNumber,
+            'new_phone_country_code' => $newPhoneCountryCode,
+            'phone_verified' => Consts::TRUE,
+            'without_verified_account' => Consts::TRUE
+        ]);
+
+        $user->phone_number = $changePhoneNumberHistory->new_phone_number;
+        $user->phone_country_code = $changePhoneNumberHistory->new_phone_country_code;
+        $user->phone_verify_code = null;
+        $user->phone_verify_created_at = null;
+        $user->save();
+
+        $changePhoneNumberHistory->delete();
+
+        PushAcountInfoHubSpotJob::dispatch($user);
+        event(new UserUpdated($user->id));
+        event(new PhoneNumberChanged($user->id, 'success'));
+
+        return $changePhoneNumberHistory;
+    }
+
+    public function resendCodeChangePhoneNumber($newPhoneNumber)
+    {
+        $user = Auth::user();
+        $changePhoneNumberHistory = ChangePhoneNumberHistory::where('old_phone_number', $user->phone_number)
+            ->where('new_phone_number', $newPhoneNumber)
+            ->where('verified', Consts::FALSE)
+            ->orderBy('id', 'desc')
+            ->first();
+
+        if (!$changePhoneNumberHistory) {
+            throw new ChangePhoneNumberException('auth.verify.phone_number_invalid');
+        }
+
+        $allowPhoneNumber = PhoneUtils::allowSmsNotification((object) ['phone_country_code' => $changePhoneNumberHistory->new_phone_country_code]);
+        if (!$allowPhoneNumber) {
+            throw new ChangePhoneNumberException('exceptions.phone_not_supported');
+        }
+
+        $code = Utils::generateRandomString(Consts::VERIFY_CODE_LENGTH, Consts::VERIFY_CODE_STRING);
+        $changePhoneNumberHistory->verification_code = $code;
+        $changePhoneNumberHistory->verification_code_created_at = Carbon::now();
+        $changePhoneNumberHistory->save();
+
+        SendSmsNotificationJob::dispatch(
+            $user,
+            Consts::NOTIFY_SMS_PHONE_CODE,
+            ['code' => $changePhoneNumberHistory->verification_code]
+        );
+
+        event(new UserUpdated($user->id));
+
+        return $changePhoneNumberHistory;
     }
 
     public function verifyChangePhoneNumber($verifyCode)
@@ -1037,11 +1175,22 @@ class UserService extends BaseService
         $changePhoneNumberHistory->save();
         $changePhoneNumberHistory->delete();
 
+        PushAcountInfoHubSpotJob::dispatch($user);
         event(new UserUpdated($user->id));
 
         event(new PhoneNumberChanged($user->id, 'success'));
 
         return $changePhoneNumberHistory;
+    }
+
+    public function cancelChangePhoneNumber()
+    {
+        ChangePhoneNumberHistory::where('user_id', Auth::id())
+            ->where('verified', Consts::FALSE)
+            ->whereNull('deleted_at')
+            ->first()->delete();
+        event(new UserUpdated(Auth::id()));
+        return 'ok';
     }
 
     private function validateChangeEmailOrPhoneOrUsername ($user)
@@ -1053,7 +1202,7 @@ class UserService extends BaseService
         return true;
     }
 
-    public function savePhoneForUser($phoneNumber)
+    public function savePhoneForUser($phoneNumber, $phoneCountryCode)
     {
         $user = Auth::user();
 
@@ -1063,8 +1212,8 @@ class UserService extends BaseService
 
         $confirmationCode = Utils::generateRandomString(Consts::VERIFY_CODE_LENGTH, Consts::VERIFY_CODE_STRING);
 
-        $user->phone_number = $phoneNumber;
-        $user->phone_country_code = PhoneUtils::getCountryCodeByFullPhoneNumber($phoneNumber);
+        $user->phone_number = PhoneUtils::makePhoneNumber($phoneNumber, $phoneCountryCode);
+        $user->phone_country_code = $phoneCountryCode;
         $user->phone_verify_code = $confirmationCode;
         $user->phone_verify_created_at = Carbon::now();
         $user->save();
@@ -1077,7 +1226,7 @@ class UserService extends BaseService
     public function checkPasswordValid($password)
     {
         if (Hash::check($password, Auth::user()->password)) {
-            return [];
+            return 'ok';
         }
 
         throw ValidationException::withMessages([
@@ -1282,7 +1431,7 @@ class UserService extends BaseService
     {
         $user = Auth::user();
         $confirmationCode = Utils::generateRandomString(Consts::VERIFY_CODE_LENGTH, Consts::VERIFY_CODE_STRING);
-        OtpUtils::initOtpCodeToCache($user->id, $confirmationCode);
+        OtpUtils::initOtpCodeToCache($user, $confirmationCode);
 
         if ($user->email_verified) {
             return $this->sendOtpCodeViaEmail($user, $confirmationCode);
@@ -1297,10 +1446,10 @@ class UserService extends BaseService
         }
     }
 
-    public function confirmOtpCode($confirmationCode, $delete = true)
+    public function confirmOtpCode($confirmationCode)
     {
         $user = Auth::user();
-        $result = OtpUtils::confirmOtpCode($user->id, $confirmationCode, $delete);
+        $result = OtpUtils::confirmOtpCode($user, $confirmationCode);
         return $result;
     }
 
@@ -1332,843 +1481,32 @@ class UserService extends BaseService
 
     public function getUnlockSecurityType()
     {
-        // $user = Auth::user();
-        // if (!$user->socialUser) {
-        //     return [
-        //         'is_verified' => true,
-        //         'unlock_by' => Consts::SECURITY_UNLOCK_TYPE_PASSWORD
-        //     ];
-        // }
-
-        // if ($user->email_verified) {
-        //     $this->sendOtpCode(false);
-        //     return [
-        //         'is_verified' => true,
-        //         'unlock_by' => Consts::SECURITY_UNLOCK_TYPE_EMAIL
-        //     ];
-        // }
-
-        // if ($user->phone_verified && PhoneUtils::allowSmsNotification($user)) {
-        //     $this->sendOtpCode(false);
-        //     return [
-        //         'is_verified' => true,
-        //         'unlock_by' => Consts::SECURITY_UNLOCK_TYPE_PHONE
-        //     ];
-        // }
-
-        // return [
-        //     'is_verified' => false
-        // ];
-    }
-
-    public function getListFriend($exceptUserIds = [], $params = [])
-    {
-        $friendsIds = $this->getFriendsId();
-        $filterFriend = array_diff($friendsIds, $exceptUserIds);
-        $searchKey = array_get($params, 'search_key');
-
-        return User::join('user_settings', 'user_settings.id', 'users.id')
-            ->when($searchKey, function ($query) use ($searchKey) {
-                $query->where('users.username', 'like', '%' . $searchKey . '%');
-            })
-            ->whereIn('users.id', $filterFriend)
-            ->select('users.id', 'users.avatar', 'users.sex', 'users.username', 'users.user_type', 'user_settings.online as online_setting')
-            ->get();
-    }
-
-    public function getUsersExisted($params)
-    {
-        $data = array_get($params, 'data', []);
-
-        if (empty($data)) {
-            return null;
-        }
-
-        return User::join('user_settings', 'user_settings.id', 'users.id')
-            ->where(function ($query) use ($data) {
-                $query->whereIn('users.email', $data)
-                    ->orWhereIn('users.phone_number', $data);
-            })
-            ->where('users.id', '<>', Auth::id())
-            ->select('users.*', 'user_settings.online as online_setting')
-            ->limit(100)
-            ->get()
-            ->transform(function ($record) {
-                return [
-                    'id'                => $record->id,
-                    'email'             => $record->email,
-                    'phone_number'      => $record->phone_number,
-                    'username'          => $record->username,
-                    'avatar'            => $record->avatar,
-                    'user_type'         => $record->user_type,
-                    'online_setting'    => $record->online_setting ?? Consts::TRUE
-                ];
-            });
-    }
-
-    public function getMyBlockList($request)
-    {
-        $userId = Auth::id();
-        return UserBlockList::with(['userInfo'])
-            ->where('user_id', $userId)
-            ->where('is_blocked', Consts::TRUE)
-            ->paginate(array_get($request, 'limit', Consts::DEFAULT_PER_PAGE));
-    }
-
-    public function addOrRemoveBlock($blockedUserId, $isBlocked = Consts::TRUE)
-    {
-        $userId = Auth::id();
-        $blockList = UserBlockList::firstOrNew(['user_id' => $userId, 'blocked_user_id' => $blockedUserId]);
-        $blockList->is_blocked = $isBlocked;
-        $blockList->save();
-
-        if ($isBlocked) {
-            $this->addOrRemoveFollow($blockedUserId, Consts::FALSE);
-            event(new UserBlocked($userId, $blockedUserId));
-        } else {
-            event(new UserUnblocked($userId, $blockedUserId));
-        }
-
-        event(new UserUpdated($userId));
-        event(new UserProfileUpdated($userId));
-
-        return $blockList;
-    }
-
-    public function getUserBlocklists($userID)
-    {
-        return UserBlockList::where('user_id', $userID)->where('is_blocked', Consts::TRUE)->pluck('blocked_user_id');
-    }
-
-    public function getRecentRoomGames($userId, $params = [])
-    {
-        return VoiceChatRoomUser::join('voice_chat_rooms', 'voice_chat_rooms.id', 'voice_chat_room_users.room_id')
-            ->where('voice_chat_rooms.game_id', '<>', Consts::COMMUNITY_ROOM_CATEGORY_GAME_ID)
-            ->where('voice_chat_room_users.user_id', $userId)
-            ->orderBy('voice_chat_room_users.started_time', 'desc')
-            ->get()
-            ->unique('game_id')
-            ->pluck('game_id')
-            ->take(5);
-    }
-
-    public function sendLoginCode($phoneNumber)
-    {
-        $phoneExist = User::where('phone_number', $phoneNumber)->exists();
-        if (!$phoneExist) {
-            throw new InvalidDataException('exceptions.not_existed.phone_number');
-        }
-
-        $code = Utils::generateRandomString(Consts::VERIFY_CODE_LENGTH, Consts::VERIFY_CODE_STRING);
-        OtpUtils::initLoginCodeToCache($phoneNumber, $code);
-        SendSmsNotificationJob::dispatch(
-            $phoneNumber,
-            Consts::NOTIFY_SMS_APP_LOGIN_CODE,
-            ['code' => $code]
-        );
-    }
-
-    public function changeEmail($email)
-    {
         $user = Auth::user();
+        if (!$user->socialUser) {
+            return [
+                'is_verified' => true,
+                'unlock_by' => Consts::SECURITY_UNLOCK_TYPE_PASSWORD
+            ];
+        }
 
         if ($user->email_verified) {
-            return $this->changeNewEmail($user, $email);
+            $this->sendOtpCode(false);
+            return [
+                'is_verified' => true,
+                'unlock_by' => Consts::SECURITY_UNLOCK_TYPE_EMAIL
+            ];
         }
-
-        if (Utils::removeUserAutoEmail($user->email)) {
-            $changingHistory = ChangeEmailHistory::create([
-                'user_id' => $user->id,
-                'old_email' => $user->email,
-                'new_email' => strtolower($email),
-                'email_verified' => Consts::TRUE,
-                'without_verified_account' => Consts::TRUE
-            ]);
-            $changingHistory->delete();
-        }
-
-        $oldEmail = $user->email;
-        $code = Utils::generateRandomString(Consts::VERIFY_CODE_LENGTH, Consts::VERIFY_CODE_STRING);
-
-        $user->email = strtolower($email);
-        $user->email_verification_code = $code;
-        $user->email_verification_code_created_at = Carbon::now();
-        $user->save();
-
-        Mail::queue(new VerificationMailQueue($user, Consts::DEFAULT_LOCALE));
-
-        event(new UserUpdated($user->id));
-        event(new EmailChanged($user->id, 'success'));
-
-        return true;
-    }
-
-    private function changeNewEmail($user, $email)
-    {
-        // for case changed email but not verified -> remove all history for user
-        ChangeEmailHistory::where('user_id', $user->id)->delete();
-
-        $code = Utils::generateRandomString(Consts::VERIFY_CODE_LENGTH, Consts::VERIFY_CODE_STRING);
-        ChangeEmailHistory::create([
-            'user_id' => $user->id,
-            'old_email' => $user->email,
-            'new_email' => strtolower($email),
-            'email_verified' => Consts::FALSE,
-            'email_verification_code' => $code,
-            'email_verification_code_created_at' => Carbon::now(),
-            'without_verified_account' => Consts::FALSE
-        ]);
-
-        event(new UserUpdated($user->id));
-
-        return true;
-    }
-
-    public function changePhone($params)
-    {
-        $user = Auth::user();
-        if ($user->phone_verified) {
-            return $this->changeNewPhone($user, $params);
-        }
-
-        if ($user->phone_number) {
-            $changingHistory = ChangePhoneNumberHistory::create([
-                'user_id' => $user->id,
-                'old_phone_number' => $user->phone_number,
-                'new_phone_number' => $params['phone_number'],
-                'new_phone_country_code' => PhoneUtils::getCountryCodeByFullPhoneNumber($params['phone_number']),
-                'phone_verified' => Consts::TRUE,
-                'without_verified_account' => Consts::TRUE
-            ]);
-            $changingHistory->delete();
-        }
-
-        $code = Utils::generateRandomString(Consts::VERIFY_CODE_LENGTH, Consts::VERIFY_CODE_STRING);
-        $user->phone_number = $params['phone_number'];
-        $user->phone_country_code = PhoneUtils::getCountryCodeByFullPhoneNumber($params['phone_number']);
-        $user->phone_verify_code = $code;
-        $user->phone_verify_created_at = Carbon::now();
-        $user->save();
-
-        event(new UserUpdated($user->id));
-        event(new PhoneNumberChanged($user->id, 'success'));
-
-        return true;
-    }
-
-    private function changeNewPhone($user, $params)
-    {
-        // for case changed phone but not verified -> remove all history for user
-        ChangePhoneNumberHistory::where('user_id', $user->id)->delete();
-
-        $code = Utils::generateRandomString(Consts::VERIFY_CODE_LENGTH, Consts::VERIFY_CODE_STRING);
-        ChangePhoneNumberHistory::create([
-            'user_id' => $user->id,
-            'old_phone_number' => $user->phone_number,
-            'new_phone_number' => $params['phone_number'],
-            'new_phone_country_code' => PhoneUtils::getCountryCodeByFullPhoneNumber($params['phone_number']),
-            'phone_verified' => Consts::FALSE,
-            'verification_code' => $code,
-            'verification_code_created_at' => Carbon::now(),
-            'without_verified_account' => Consts::FALSE
-        ]);
-
-        event(new UserUpdated($user->id));
-
-        return true;
-    }
-
-    public function verifyEmail($params, $ip)
-    {
-        $user = User::find(Auth::id());
-        if ($user->email === $params['email']) {
-            return $this->verifyOriginEmail($user, $params['code'], $ip);
-        }
-
-        return $this->verifyChangingEmail($user, $params);
-    }
-
-    private function verifyOriginEmail($user, $code, $ip)
-    {
-        if ($user->email_verified) {
-            throw new SecurityException('exceptions.auth.verify.email_verified');
-        }
-
-        if ($user->email_verification_code !== $code) {
-            throw new SecurityException('exceptions.auth.verify.error_code');
-        }
-
-        if ($user->isEmailVerificationCodeExpired()) {
-            throw new SecurityException('exceptions.auth.verify.expired_code');
-        }
-
-        $user->email_verified = Consts::TRUE;
-        $user->email_verification_code = null;
-        $user->email_verification_code_created_at = null;
-        $user->save();
-
-        if ($user->canActiveAndCreateBalanceForUser()) {
-            $this->activeAndCreateBalanceForUser($user, $ip);
-        }
-
-        event(new UserUpdated($user->id));
-
-        return true;
-    }
-
-    private function verifyChangingEmail($user, $params)
-    {
-        $changingHistory = ChangeEmailHistory::where('user_id', $user->id)
-            ->where('new_email', $params['email'])
-            ->where('email_verified', Consts::FALSE)
-            ->where('email_verification_code', $params['code'])
-            ->orderBy('id', 'desc')
-            ->first();
-
-        if (!$changingHistory) {
-            throw new SecurityException('exceptions.auth.verify.error_code');
-        }
-
-        if ($changingHistory->isEmailVerificationCodeExpired()) {
-            throw new SecurityException('exceptions.auth.verify.expired_code');
-        }
-
-        $oldEmail = $user->email;
-
-        $user->email = $changingHistory->new_email;;
-        $user->save();
-
-        $changingHistory->email_verified = Consts::TRUE;
-        $changingHistory->email_verification_code = null;
-        $changingHistory->email_verification_code_created_at = null;
-        $changingHistory->save();
-        $changingHistory->delete();
-
-        event(new UserUpdated($user->id));
-        event(new EmailChanged($user->id, 'success'));
-
-        return true;
-    }
-
-    public function verifyPhone($params, $ip)
-    {
-        $user = User::find(Auth::id());
-        if ($user->phone_number === $params['phone_number']) {
-            return $this->verifyOriginPhone($user, $params['code'], $ip);
-        }
-
-        return $this->verifyChangingPhone($params['code'], $params);
-    }
-
-    private function verifyOriginPhone($user, $code, $ip)
-    {
-        if ($user->phone_verified) {
-            throw new SecurityException('exceptions.auth.verify.phone_verified');
-        }
-
-        if ($user->phone_verify_code !== $code) {
-            throw new SecurityException('exceptions.auth.verify.error_code');
-        }
-
-        if ($user->isPhoneNumberVerificationCodeExpired()) {
-            throw new SecurityException('exceptions.auth.verify.expired_code');
-        }
-
-        $user->phone_verified = Consts::TRUE;
-        $user->phone_verify_code = null;
-        $user->phone_verify_created_at = null;
-        $user->save();
-
-        if ($user->canActiveAndCreateBalanceForUser()) {
-            $this->activeAndCreateBalanceForUser($user, $ip);
-        }
-
-        event(new UserUpdated($user->id));
-
-        return true;
-    }
-
-    private function verifyChangingPhone($code, $params)
-    {
-        $userId = Auth::id();
-        $changeHistory = ChangePhoneNumberHistory::where('user_id', $userId)
-            ->where('new_phone_number', $params['phone_number'])
-            ->where('verified', Consts::FALSE)
-            ->where('verification_code', $code)
-            ->first();
-
-        if (!$changeHistory) {
-            throw new SecurityException('auth.verify.error_code');
-        }
-
-        if ($changeHistory->isVerificationCodeExpired()) {
-            throw new SecurityException('auth.verify.expired_code');
-        }
-
-        $user = User::find($userId);
-        $user->phone_number = $changeHistory->new_phone_number;
-        $user->phone_country_code = $changeHistory->new_phone_country_code;
-        $user->save();
-
-        $changeHistory->verified = Consts::TRUE;
-        $changeHistory->verification_code = null;
-        $changeHistory->verification_code_created_at = null;
-        $changeHistory->save();
-        $changeHistory->delete();
-
-        event(new UserUpdated($user->id));
-        event(new PhoneNumberChanged($user->id, 'success'));
-
-        return true;
-    }
-
-    private function activeAndCreateBalanceForUser($user, $ip)
-    {
-        $device = $this->getCurrentDevice('', $user->id);
-        $device->latest_ip_address = $ip;
-        $device->save();
-
-        $this->createNewUserBalance($user->id);
-        AddKlaviyoMailList::dispatch($user);
-    }
-
-    public function sendEmailVerificationCode($user, $params)
-    {
-        if ($user->email_verified) {
-            return $this->sendChangingEmailVerificationCode($user, $params['email']);
-        }
-
-        $trueEmail = Utils::removeUserAutoEmail($user->email);
-        if (!$trueEmail) {
-            throw new SecurityException('exceptions.auth.verify.not_register_email');
-        }
-
-        $code = Utils::generateRandomString(Consts::VERIFY_CODE_LENGTH, Consts::VERIFY_CODE_STRING);
-        $user->email_verification_code = $code;
-        $user->email_verification_code_created_at = Carbon::now();
-        $user->save();
-
-        Mail::queue(new VerificationMailQueue($user, Consts::DEFAULT_LOCALE));
-
-        return true;
-    }
-
-    private function sendChangingEmailVerificationCode($user, $email)
-    {
-        $changingHistory = ChangeEmailHistory::where('user_id', $user->id)
-            ->where('old_email', $user->email)
-            ->where('new_email', $email)
-            ->where('email_verified', Consts::FALSE)
-            ->orderBy('id', 'desc')
-            ->first();
-
-        if (!$changingHistory) {
-            throw new SecurityException('exceptions.auth.verify.email_invalid');
-        }
-
-        $code = Utils::generateRandomString(Consts::VERIFY_CODE_LENGTH, Consts::VERIFY_CODE_STRING);
-        $changingHistory->email_verification_code = $code;
-        $changingHistory->email_verification_code_created_at = Carbon::now();
-        $changingHistory->save();
-
-        Mail::queue(new VerificationChangeMailQueue($changingHistory, $user->username, Consts::DEFAULT_LOCALE));
-
-        return true;
-    }
-
-    public function sendPhoneVerificationCode($user, $params)
-    {
-        if ($user->phone_verified) {
-            return $this->sendChangingPhoneVerificationCode($user, $params['phone_number']);
-        }
-
-        if (!$user->phone_number) {
-            throw new SecurityException('exceptions.auth.verify.not_register_phone');
-        }
-
-        $code = Utils::generateRandomString(Consts::VERIFY_CODE_LENGTH, Consts::VERIFY_CODE_STRING);
-        $user->phone_verify_code = $code;
-        $user->phone_verify_created_at = Carbon::now();
-        $user->save();
-        SendSmsNotificationJob::dispatch($user, Consts::NOTIFY_SMS_VERIFY_CODE);
-
-        event(new UserUpdated($user->id));
-
-        return true;
-    }
-
-    public function sendChangingPhoneVerificationCode($user, $phoneNumber)
-    {
-        $changingHistory = ChangePhoneNumberHistory::where('user_id', $user->id)
-            ->where('old_phone_number', $user->phone_number)
-            ->where('new_phone_number', $phoneNumber)
-            ->where('verified', Consts::FALSE)
-            ->orderBy('id', 'desc')
-            ->first();
-
-        if (!$changingHistory) {
-            throw new SecurityException('exceptions.auth.verify.phone_number_invalid');
-        }
-
-        $code = Utils::generateRandomString(Consts::VERIFY_CODE_LENGTH, Consts::VERIFY_CODE_STRING);
-        $changingHistory->verification_code = $code;
-        $changingHistory->verification_code_created_at = Carbon::now();
-        $changingHistory->save();
-
-        SendSmsNotificationJob::dispatch(
-            $phoneNumber,
-            Consts::NOTIFY_SMS_PHONE_CODE,
-            ['code' => $changingHistory->verification_code]
-        );
-
-        event(new UserUpdated($user->id));
-
-        return true;
-    }
-
-    public function cancelChangingEmail()
-    {
-        $userId = Auth::id();
-        $deleteChange = ChangeEmailHistory::where('user_id', $userId)
-            ->where('email_verified', Consts::FALSE)
-            ->whereNull('deleted_at')
-            ->delete();
-
-        event(new UserUpdated($userId));
-
-        return $deleteChange;
-    }
-
-    public function cancelChangingPhone()
-    {
-        $userId = Auth::id();
-        $deleteChange = ChangePhoneNumberHistory::where('user_id', $userId)
-            ->where('verified', Consts::FALSE)
-            ->whereNull('deleted_at')
-            ->delete();
-
-        event(new UserUpdated($userId));
-
-        return $deleteChange;
-    }
-
-    public function getPlayingFriends($params)
-    {
-        $friendsIds = $this->getFriendsId();
-        return VoiceChatRoomUser::select('users.id', 'users.avatar', 'users.username', 'users.sex', 'voice_chat_rooms.name as room_name', 'voice_chat_rooms.game_id as room_game_id')
-            ->join('voice_chat_rooms', 'voice_chat_rooms.id', 'voice_chat_room_users.room_id')
-            ->join('users', 'users.id', 'voice_chat_room_users.user_id')
-            ->join('user_settings', 'user_settings.id', 'voice_chat_room_users.user_id')
-            ->whereIn('voice_chat_room_users.user_id', $friendsIds)
-            ->whereNull('voice_chat_room_users.ended_time')
-            ->where('voice_chat_rooms.status', Consts::VOICE_ROOM_STATUS_CALLING)
-            ->where('voice_chat_rooms.is_private', Consts::FALSE)
-            ->where('user_settings.online', Consts::TRUE)
-            ->limit(array_get($params, 'limit', Consts::DEFAULT_PER_PAGE))
-            ->get();
-    }
-
-    private function getFriendsId()
-    {
-        $userId = Auth::id();
-        return User::join('user_following as table1', 'table1.following_id', 'users.id')
-            ->join('user_following as table2', 'table2.user_id', 'users.id')
-            ->where('table1.user_id', $userId)
-            ->where('table1.is_following', Consts::TRUE)
-            ->where('table2.following_id', $userId)
-            ->where('table2.is_following', Consts::TRUE)
-            ->groupBy('table2.user_id')
-            ->pluck('table2.user_id')
-            ->toArray();
-    }
-
-    public function changePassword($password)
-    {
-        $user = User::find(Auth::id());
-        $user->password = bcrypt($password);
-        $user->save();
-
-        Mail::queue(new ChangePasswordMail($user));
-
-        event(new UserUpdated($user->id));
-
-        return true;
-    }
-
-    public function changeUsername($username)
-    {
-        $user = User::find(Auth::id());
-        $oldUsername = $user->username;
-
-        $user->username = $username;
-        $user->save();
-
-        // update username for Mattermost
-        $userData = ChatUtils::getUserDataToCache($user->id);
-        ChatUtils::updateUserInfo($userData);
-
-        // save new info of user to cache for community.
-        CommunityUtils::updateAllChannelMembers($user->id);
-
-        $data = [
-            'user_id'        => $user->id,
-            'old_username'   => $oldUsername,
-            'username'       => $user->username
-        ];
-        event(new UsernameChanged($data));
-        event(new UserUpdated($user->id));
-        event(new UserProfileUpdated($user->id));
-
-        return true;
-    }
-
-    public function getSuggestFriends($params)
-    {
-        $user = Auth::user();
-        $limit = array_get($params, 'limit', Consts::DEFAULT_PER_PAGE);
-        $friendsIds = $this->getFriendsId();
-
-        // user has same phone region
-        $exceptUserIds = array_merge($friendsIds, [$user->id]);
-        $sameRegion = User::whereNotIn('id', $exceptUserIds)
-            ->whereNotNull('phone_country_code')
-            ->where('phone_country_code', $user->phone_country_code)
-            ->take($limit)
-            ->pluck('id')
-            ->toArray();
-
-        if (count($sameRegion) >= $limit) {
-            return $this->getListFriendInfo($sameRegion);
-        }
-
-        // user has same languages
-        $exceptUserIds = array_merge($exceptUserIds, $sameRegion);
-        $sameLanguages = User::whereNotIn('id', $exceptUserIds)
-            ->where(function ($q) use ($user) {
-                foreach($user->languages as $key => $language) {
-                    if ($key === 0) {
-                        $q->where('languages', 'like', "%{$language}%");
-                    }
-                    $q->orWhere('languages', 'like', "%{$language}%");
-                }
-            })
-            ->take($limit - count($sameRegion))
-            ->pluck('id')
-            ->toArray();
-
-        $userIds = array_merge($sameRegion, $sameLanguages);
-        if (count($userIds) >= $limit) {
-            return $this->getListFriendInfo($userIds);
-        }
-
-        // user has same recent joined rooms
-        $exceptUserIds = array_merge($exceptUserIds, $sameLanguages);
-        $userRecentRoomGame = $this->getRecentRoomGames($user->id);
-        $sameRoomGame = VoiceChatRoomUser::join('voice_chat_rooms', 'voice_chat_rooms.id', 'voice_chat_room_users.room_id')
-            ->whereNotIn('voice_chat_room_users.user_id', $exceptUserIds)
-            ->whereIn('voice_chat_rooms.game_id', $userRecentRoomGame)
-            ->orderBy('voice_chat_room_users.started_time', 'desc')
-            ->get()
-            ->unique('user_id')
-            ->pluck('user_id')
-            ->take($limit - count($userIds))
-            ->toArray();
-
-        $userIds = array_merge($userIds, $sameRoomGame);
-        return $this->getListFriendInfo($userIds);
-    }
-
-    private function getListFriendInfo($userIds)
-    {
-        return User::withoutAppends()
-            ->join('user_settings', 'user_settings.id', 'users.id')
-            ->whereIn('users.id', $userIds)
-            ->select('users.id', 'users.username', 'users.sex', 'users.avatar', 'user_settings.online as online_setting')
-            ->get();
-    }
-
-    public function checkEmailExists($email)
-    {
-        return User::where('email', $email)->exists();
-    }
-
-    public function checkPhoneNumberExists($params)
-    {
-        return User::where('phone_number', $params['phone_number'])->exists();
-    }
-
-    public function sendEmailAuthorizationCode($params)
-    {
-        $user = $this->getUserWithEmailOrPhone($params);
-
-        $code = Utils::generateRandomString(Consts::VERIFY_CODE_LENGTH, Consts::VERIFY_CODE_STRING);
-        OtpUtils::initAuthorizationCodeToCache($user->id, $code);
-
-        $this->sendAuthorizationCodeEmail($user, $code);
-
-        return $user;
-    }
-
-    public function sendPhoneAuthorizationCode($params)
-    {
-        $user = $this->getUserWithEmailOrPhone($params);
-        if (!PhoneUtils::allowSmsNotification($user)) {
-            throw new PhoneNumberNotSupportedException();
-        }
-
-        $code = Utils::generateRandomString(Consts::VERIFY_CODE_LENGTH, Consts::VERIFY_CODE_STRING);
-        OtpUtils::initAuthorizationCodeToCache($user->id, $code);
-
-        $this->sendAuthorizationCodeSms($user, $code);
-
-        return $user;
-    }
-
-    private function sendAuthorizationCodeSms($user, $code)
-    {
-        return SendSmsNotificationJob::dispatch(
-            $user,
-            Consts::NOTIFY_SMS_AUTHORIZATION_CODE,
-            ['code' => $code]
-        );
-    }
-
-    private function sendAuthorizationCodeEmail($user, $code)
-    {
-        return Mail::queue(new AuthorizationMailQueue($user, Consts::DEFAULT_LOCALE, $code));
-    }
-
-    public function getUserWithEmailOrPhone ($params)
-    {
-        $email = array_get($params, 'email');
-        $phone = array_get($params, 'phone_number');
-        return User::withoutAppends()
-            ->when($email, function ($query) use ($email) {
-                $query->where('email', $email);
-            })
-            ->when($phone, function ($query) use ($phone) {
-                $query->orWhere('phone_number', $phone);
-            })
-            ->first();
-    }
-
-    public function getAuthorizationUsers($params)
-    {
-        $email = array_get($params, 'email');
-        $phone = array_get($params, 'phone_number');
-        return User::withoutAppends()
-            ->with(['socialUser'])
-            ->where('email', $email)
-            ->orWhere(function ($query) use ($phone) {
-                $query->where('phone_number', $phone)
-                    ->whereNotNull('phone_number');
-            })
-            ->get();
-    }
-
-    public function attachSocialAccount($params, $providerUser)
-    {
-        $userId = array_get($params, 'user_id');
-        $code = array_get($params, 'code');
-        if (!OtpUtils::confirmAuthorizationCode($userId, $code)) {
-            throw new InvalidCodeException();
-        }
-
-        return SocialUser::updateOrCreate(
-            ['user_id' => $userId, 'provider' => array_get($params, 'provider')],
-            [
-                'provider_id' =>  $providerUser->id,
-                'email' => !empty($providerUser->email) ? $providerUser->email : null,
-                'phone_number' => !empty($providerUser->phone) ? PhoneUtils::formatPhoneNumber($providerUser->phone) : null
-            ]
-        );
-    }
-
-    public function deleteUser()
-    {
-        $userId = Auth::id();
-        Community::where('creator_id', $userId)->update(['status' => Consts::COMMUNITY_STATUS_DELETED, 'inactive_at' => Carbon::now()]);
-        User::where('id', $userId)->update(['status' => Consts::USER_DELETED, 'deleted_at' => Carbon::now()]);
-        event(new UserProfileUpdated($userId));
-        CommunityUtils::updateAllChannelMembers($userId);
-        return true;
-    }
-
-    public function getCommunityAvailable($userId)
-    {
-        return DB::table('community_members')
-            ->select('community_members.*', 'communities.deleted_at', 'communities.status as community_status')
-            ->join('communities', 'communities.id', 'community_members.community_id')
-            ->whereNull('communities.deleted_at')
-            ->whereNull('community_members.deleted_at')
-            ->where('communities.status', Consts::COMMUNITY_STATUS_ACTIVE)
-            ->where('community_members.user_id', $userId)
-            ->get()->pluck('community_id');
-    }
-
-    // ======================== API VERSION 2 ========================
-    public function sendEmailOtpCode($throwException = true)
-    {
-        $user = Auth::user();
-        $confirmationCode = Utils::generateRandomString(Consts::VERIFY_CODE_LENGTH, Consts::VERIFY_CODE_STRING);
-        OtpUtils::initEmailOtpCodeToCache($user->id, $confirmationCode);
-        if ($user->email_verified) {
-            return $this->sendOtpCodeViaEmail($user, $confirmationCode);
-        }
-
-        if ($throwException) {
-            throw new AccountNotActivedException('exceptions.user_not_activated');
-        }
-    }
-
-    public function sendPhoneOtpCode($throwException = true)
-    {
-        $user = Auth::user();
-        $confirmationCode = Utils::generateRandomString(Consts::VERIFY_CODE_LENGTH, Consts::VERIFY_CODE_STRING);
-        OtpUtils::initPhoneOtpCodeToCache($user->id, $confirmationCode);
 
         if ($user->phone_verified && PhoneUtils::allowSmsNotification($user)) {
-            return $this->sendOtpCodeViaPhone($user, $confirmationCode);
+            $this->sendOtpCode(false);
+            return [
+                'is_verified' => true,
+                'unlock_by' => Consts::SECURITY_UNLOCK_TYPE_PHONE
+            ];
         }
 
-        if ($throwException) {
-            throw new AccountNotActivedException('exceptions.user_not_activated');
-        }
-    }
-
-    public function confirmEmailOtpCode($confirmationCode, $delete = true)
-    {
-        $user = Auth::user();
-        $confirmationCode = OtpUtils::confirmEmailOtpCode($user->id, $confirmationCode, $delete);
-        if (!$confirmationCode) {
-            throw new SecurityException('exceptions.auth.verify.error_otp_code');
-        }
-        return $confirmationCode;
-    }
-
-    public function confirmPhoneOtpCode($confirmationCode, $delete = true)
-    {
-        $user = Auth::user();
-        $confirmationCode = OtpUtils::confirmPhoneOtpCode($user->id, $confirmationCode, $delete);
-        if (!$confirmationCode) {
-            throw new SecurityException('exceptions.auth.verify.error_otp_code');
-        }
-        return $confirmationCode;
-    }
-
-    public function getProviderUser($request)
-    {
-        $provider = $request->provider;
-        $token = $request->token;
-        $openId = (isset($request->open_id)) ? $request->open_id : null;
-        switch ($provider) {
-            case Consts::PROVIDER_TIKTOK:
-                $providerUser = Socialite::with($provider)->userFromTokenAndOpenId($token, $openId);
-                break;
-            default:
-                $providerUser = Socialite::with($provider)->userFromToken($token);
-                break;
-        }
-        return $providerUser;
+        return [
+            'is_verified' => false
+        ];
     }
 }

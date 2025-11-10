@@ -25,9 +25,9 @@ class SampleTestEvent extends AppBroadcastEvent
     public function __construct($userId)
     {
         $this->userId = $userId;
-        $this->data = cloneDeep([
+        $this->data = [
             'message' => 'Test socket.io'
-        ]);
+        ];
     }
 
     /**

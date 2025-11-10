@@ -3,7 +3,6 @@
 namespace App\Agora\Support;
 
 use App\Agora\Support\RtcTokenBuilder;
-use App\Agora\Support\RtmTokenBuilder;
 use App\Agora\Support\DynamicKey4;
 use App\Agora\Support\DynamicKey5;
 use Exception;
@@ -30,17 +29,6 @@ class Model
 
         $token = RtcTokenBuilder::buildTokenWithUid(
             $this->appId, $this->certificate, $channelName, $uid, $role, $privilegeExpiredTs
-        );
-
-        return $token;
-    }
-
-    public function generateRtmToken($uid, $role = RtmTokenBuilder::RoleRtmUser)
-    {
-        $privilegeExpiredTs = time() + $this->expireTimeInSeconds;
-
-        $token = RtmTokenBuilder::buildToken(
-            $this->appId, $this->certificate, $uid, $role, $privilegeExpiredTs
         );
 
         return $token;

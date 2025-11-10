@@ -54,7 +54,7 @@ class AdminController extends AppBaseController
     public function clearCache()
     {
         MasterdataService::clearCacheAllTable();
-        return $this->sendResponse([]);
+        return $this->sendResponse('ok');
     }
 
     public function getUsers(Request $request)
@@ -179,7 +179,7 @@ class AdminController extends AppBaseController
             $adminId    = $request->id;
             $data       = $this->adminService->deleteAdministrator($adminId);
             DB::commit();
-            return $this->sendResponse([]);
+            return $this->sendResponse('Ok');
         } catch (\Exception $ex) {
             DB::rollBack();
             throw $ex;

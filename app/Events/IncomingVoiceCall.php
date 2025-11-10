@@ -26,7 +26,7 @@ class IncomingVoiceCall extends AppBroadcastEvent
     public function __construct($userId, $receiverUser)
     {
         $this->userId   = $userId;
-        $this->data     = cloneDeep($receiverUser);
+        $this->data     = $receiverUser;
     }
 
     /**

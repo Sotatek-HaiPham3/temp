@@ -27,7 +27,7 @@ class UserProfileUpdated extends AppBroadcastEvent
         $this->userId   = $userId;
         $user = User::find($userId);
         $userService    = new UserService();
-        $this->data     = cloneDeep($userService->getUserInfoByUsername($user->username));
+        $this->data     = $userService->getUserInfoByUsername($user->username);
     }
 
     /**

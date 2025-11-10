@@ -26,8 +26,9 @@ class UserUpdated extends AppBroadcastEvent
     public function __construct($userId)
     {
         $this->userId   = $userId;
+
         $userService    = new UserService();
-        $this->data     = cloneDeep($userService->getUserProfile($userId));
+        $this->data     = $userService->getUserProfile($userId)->toArray();
     }
 
     /**

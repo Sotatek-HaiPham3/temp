@@ -114,25 +114,5 @@ export default {
     EXECUTING: 'executing',
     DENIED: 'denied',
     CANCEL: 'cancel'
-  },
-
-  ROOM_TYPES: {
-    USERNAME: 'username',
-    CODE: 'code'
-  },
-
-  PINNED_OPTION: {
-    PINNED: 1,
-    UNPIN: 0
-  },
-
-  VOICE_GROUP_ROLE_ADMIN: 'admin',
-  VOICE_GROUP_ROLE_GLOBAL_ADMIN: 'global-admin',
-
-  COMMUNITY_STATUS_CREATED: 'created',
-  COMMUNITY_STATUS_ACCEPTED: 'accepted',
-  COMMUNITY_STATUS_CANCELED: 'canceled',
-  COMMUNITY_STATUS_REJECT: 'rejected',
-  COMMUNITY_STATUS_PENDING: 'pending',
-  COMMUNITY_STATUS_APPROVED: 'approved'
+  }
 }

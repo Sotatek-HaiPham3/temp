@@ -49,6 +49,6 @@ class FirebasePushNotification extends Command
                 'xxx' => 'yyyy'
             ],
         ];
-        $this->fcmService->pushNotification(1, $params);
+        $this->fcmService->pushNotifcation(1, $params);
     }
 }

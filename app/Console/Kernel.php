@@ -23,12 +23,9 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('game:order')->daily();
-//        $schedule->command('videos-counter:run')->hourly();
-        $schedule->command('delete-account:run')->daily();
-        $schedule->command('delete-community:run')->everyMinute();
-        $schedule->command('passport:purge')->hourly(); // Purge revoked and expired tokens and auth codes
-        // $schedule->command('intro-task-reminder:run')->monthly();
+        $schedule->command('game:order')->daily();
+        $schedule->command('videos-counter:run')->hourly();
+        $schedule->command('intro-task-reminder:run')->monthly();
     }
 
     /**

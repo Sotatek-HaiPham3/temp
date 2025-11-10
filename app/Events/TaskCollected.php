@@ -27,9 +27,9 @@ class TaskCollected extends AppBroadcastEvent
     public function __construct($userId, $taskingId)
     {
         $this->userId   = $userId;
-        $this->data = cloneDeep([
+        $this->data = [
             'tasking_id' => $taskingId
-        ]);
+        ];
     }
 
     /**

@@ -14,9 +14,9 @@ class AddThumnailHoverThumnailActiveToGamesTable extends Migration
     public function up()
     {
         Schema::table('games', function (Blueprint $table) {
-            $table->text('thumbnail_hover')->after('cover');
-            $table->text('thumbnail_active')->after('cover');
-            $table->text('banner')->after('cover');
+            $table->text('thumbnail_hover')->after('cover')->nullable();
+            $table->text('thumbnail_active')->after('cover')->nullable();
+            $table->text('banner')->after('cover')->nullable();
         });
     }
 

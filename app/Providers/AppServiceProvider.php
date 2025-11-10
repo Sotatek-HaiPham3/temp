@@ -2,11 +2,11 @@
 
 namespace App\Providers;
 
-use App\PhoneUtils;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\URL;
 use App\Http\Services\MasterdataService;
 use App\Models\User;
 use App\Models\Admin;
@@ -18,7 +18,6 @@ use App\Models\GamePlatform;
 use App\Models\Bounty;
 use App\Models\InvitationCode;
 use App\Models\SessionReview;
-use App\Models\RoomCategory;
 use App\Consts;
 use DB;
 use Log;
@@ -45,48 +44,38 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         Schema::defaultStringLength(191);
+
+        $appUrlScheme = parse_url(config('app.url'), PHP_URL_SCHEME);
+        if ($appUrlScheme === 'https') {
+            URL::forceScheme('https');
+        }
+
+
         Validator::extend('unique_email', function($attribute, $value, $parameters, $validator) {
             $user = User::where('email', $value)->first();
             return !$user;
         });
-
         Validator::extend('unique_email_adminstrator', function($attribute, $value, $parameters, $validator) {
             return !Admin::where('email', $value)->exists();
         });
-
         Validator::extend('unique_username', function($attribute, $value, $parameters, $validator) {
-            return !User::where('username', $value)->exists();
-        });
-
-        Validator::extend('unique_phone_number', function($attribute, $value, $parameters, $validator) {
-            $phoneNumber = PhoneUtils::formatPhoneNumber($value);
-            return !User::where('phone_number', $phoneNumber)
-                ->when(!empty($parameters[0]), function ($query) use ($parameters) {
-                    $query->where('id', '!=', $parameters[0]);
-                })
+            // return ! User::where(DB::raw('BINARY `username`'), $value)
+            return ! User::where('username', $value)
                 ->exists();
         });
-
-        Validator::extend('exists_phone_number', function($attribute, $value, $parameters, $validator) {
-            $phoneNumber = PhoneUtils::formatPhoneNumber($value);
-            return User::where('phone_number', $phoneNumber)->exists();
+        Validator::extend('unique_phone_number', function($attribute, $value, $parameters, $validator) {
+            // return ! User::where(DB::raw('BINARY `username`'), $value)
+            return ! User::where('phone_number', $value)
+                ->exists();
         });
-
-        Validator::extend('valid_phone_number', function($attribute, $value, $parameters, $validator) {
-            if (PhoneUtils::getCountryCodeByFullPhoneNumber($value)) {
-                return true;
-            }
-            return false;
-        });
-
         Validator::extend('exists_username', function($attribute, $value, $parameters, $validator) {
-            return User::where('username', $value)->exists();
+            // return User::where(DB::raw('BINARY `username`'), $value)
+            return User::where('username', $value)
+                ->exists();
         });
-
         Validator::extend('password_white_space', function($attribute, $value, $parameters, $validator) {
             return is_int(strpos($value, ' ')) ? false :true;
         });
-
         Validator::extend('verified_email', function($attribute, $value, $parameters, $validator) {
             $user = User::where('email', $value)->first();
             if ($user) {
@@ -94,7 +83,6 @@ class AppServiceProvider extends ServiceProvider
             }
             return true;
         });
-
         Validator::extend('verified_account', function($attribute, $value, $parameters, $validator) {
             $user = User::where('email', $value)
                 ->orWhere('username', $value)
@@ -107,7 +95,6 @@ class AppServiceProvider extends ServiceProvider
 
             return false;
         });
-
         Validator::extend('correct_password', function ($attribute, $value, $parameters, $validator) {
             $user = Auth::user();
             return (password_verify($value, $user->password));
@@ -186,20 +173,10 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Validator::extend('special_characters', function ($attribute, $value, $parameters, $validator) {
-            if (substr($value, 0, strlen(Consts::USER_DELETED_USERNAME_PREFIX)) === Consts::USER_DELETED_USERNAME_PREFIX) {
-                return false;
-            }
-            return preg_match('/^[A-Za-z0-9_\.]+$/', $value);
+            return preg_match('/^[A-Za-z0-9]+$/', $value);
         });
 
-        Validator::extend('special_characters_email', function ($attribute, $value, $parameters, $validator) {
-            if (substr($value, 0, strlen(Consts::USER_DELETED_USERNAME_PREFIX)) === Consts::USER_DELETED_USERNAME_PREFIX) {
-                return false;
-            }
-            return true;
-        });
-
-        Validator::extend('valid_phone_country_code', function ($attribute, $value, $parameters, $validator) {
+        Validator::extend('valid_phone_contry_code', function ($attribute, $value, $parameters, $validator) {
             return PhoneNumber::isValidCountryCode($value);
         });
 
@@ -210,22 +187,6 @@ class AppServiceProvider extends ServiceProvider
             }
 
             return intval($value) >= 0;
-        });
-
-        Validator::extend('valid_room_size_range', function ($attribute, $value, $parameters, $validator) {
-            $value = explode($value, ',');
-            $result = true;
-            foreach ($value as $val) {
-                if (!is_int(intval($val))) {
-                    $result = false;
-                    break;
-                }
-            }
-            return $result || empty($value);
-        });
-
-        Validator::extend('room_category_existed', function ($attribute, $value, $parameters, $validator) {
-            return !RoomCategory::where('game_id', $value)->exists();
         });
 
         View::composer('*', function ($view) {

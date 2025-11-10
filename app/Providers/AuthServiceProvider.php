@@ -29,11 +29,19 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        $tokenExpiryTime = env('TOKEN_EXPIRE_TIME', 2);
-        $refreshTokenExpiryTime = env('REFRESH_TOKEN_EXPIRE_TIME', 60);
+        $tokenExpiryTime = env('TOKEN_EXPRY_TIME', 6);
+        Passport::tokensExpireIn(now()->addMonths($tokenExpiryTime));
+        Passport::refreshTokensExpireIn(now()->addMonths($tokenExpiryTime));
 
-        Passport::tokensExpireIn(now()->addDays($tokenExpiryTime));
-        Passport::personalAccessTokensExpireIn(now()->addDays($tokenExpiryTime));
-        Passport::refreshTokensExpireIn(now()->addDays($refreshTokenExpiryTime));
+        $this->registerPersonalAccess($tokenExpiryTime);
+    }
+
+    public function registerPersonalAccess($tokenExpiryTime)
+    {
+        $lifetime = new DateInterval("PT{$tokenExpiryTime}H");
+        app()->get(AuthorizationServer::class)->enableGrantType(
+            new PersonalAccessGrant(),
+            $lifetime
+        );
     }
 }

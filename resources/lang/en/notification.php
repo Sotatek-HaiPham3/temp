@@ -13,11 +13,7 @@ return [
     'marketing' => 'Marketing notification',
     'bounty' => 'Bounty notification',
     'session' => 'Session notification',
-    'title.other_nofify' => 'Notification',
-    'title.room_invitation' => 'Room invitation',
-    'title.room_started' => 'Join me, my friend!',
-    'title.new_follower' => 'New follower',
-    'title.new_follower.friend' => 'New follower, new friend',
+    'other_nofify' => 'Notification',
     'message.new' => 'You received new message from :username.',
     'favourite.new_gameprofile' => ':username has added a :game session.',
     'favourite.new_bounty' => ':username has added new bounty :bounty.',
@@ -75,9 +71,6 @@ return [
     'gamelancer.approve_from_free_gamelancer' => 'Congratulations! You’re premium gamelancer now. Check and setup the price of your free sessions if any exists.',
     'gamelancer.approve_free_gamelancer' => 'Congratulations! You’re free gamelancer now. Your sessions will be played for free.',
     'gamelancer.reject' => 'Sorry! Your request to be a gamelancer has been rejected. Try again!',
-    'follow.new' => ':username has followed you. Follow back to be friends.',
-    'follow.new.friend' => ':username has followed you back.',
-    'room.invitation' => ':username is inviting you to join a room: :room_category_name - :room_title.',
-    'room.created' => ':username just started new room: :room_category_name - :room_title.',
+    'follow.new' => ':username started following you.',
     'tip' => ':username has tip you :rewards rewards.'
 ];

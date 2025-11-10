@@ -32,6 +32,9 @@ trait SessionTrait {
             'started_event' => Utils::currentMilliseconds()
         ]);
 
+        $userIds = [$session->gamelancer_id, $session->claimer_id];
+        $this->eventSessionMessageUpdated($systemMessage->id, $userIds);
+
         return $systemMessage;
     }
 

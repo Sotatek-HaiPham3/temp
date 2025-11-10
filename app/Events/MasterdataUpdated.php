@@ -22,7 +22,7 @@ class MasterdataUpdated extends AppBroadcastEvent
      */
     public function __construct($data = null)
     {
-        $this->data     = cloneDeep($data);
+        $this->data     = $data;
     }
 
     /**

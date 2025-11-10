@@ -25,7 +25,7 @@ class SessionBooked extends AppBroadcastEvent
     public function __construct($userId, $session)
     {
         $this->userId = $userId;
-        $this->data = cloneDeep($session);
+        $this->data = $session;
     }
 
     /**

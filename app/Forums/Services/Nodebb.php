@@ -39,7 +39,7 @@ class Nodebb {
         }
 
         return static::authenticateForUser()
-            ->setApiPrefix(static::$apiPrefix)
+            ->setApiPrefix('/api/v2')
             ->getUserModel()
             ->revokeToken(Auth::user()->nodebbUser->nodebb_user_id, $token->nodebb_token);
     }
@@ -52,7 +52,7 @@ class Nodebb {
 
         $systemProvider = static::authenticateForSystem();
 
-        $result = $systemProvider->setApiPrefix(static::$apiPrefix)->getCategoryModel()
+        $result = $systemProvider->setApiPrefix('/api/v2')->getCategoryModel()
             ->create([
                 '_uid' => config('nodebb.members.system.uid'),
                 'name' => $categoryName
@@ -75,7 +75,7 @@ class Nodebb {
 
         $systemProvider = static::authenticateForSystem();
 
-        $result = $systemProvider->setApiPrefix(static::$apiPrefix)
+        $result = $systemProvider->setApiPrefix('/api/v2')
             ->getUserModel()->createUser([
                 '_uid'     => config('nodebb.members.system.uid'),
                 'email'    => $email,
@@ -115,7 +115,7 @@ class Nodebb {
         ]);
 
         $provider = static::authenticateForUser();
-        $result = $provider->setApiPrefix(static::$apiPrefix)
+        $result = $provider->setApiPrefix('/api/v2')
             ->getTopicModel()->createComment($tid, $params);
 
         return static::handleResult($result);
@@ -132,7 +132,7 @@ class Nodebb {
         ];
 
         $provider = static::authenticateForUser();
-        $result = $provider->setApiPrefix(static::$apiPrefix)
+        $result = $provider->setApiPrefix('/api/v2')
             ->getTopicModel()->createTopic($params);
 
         return static::handleResult($result);
@@ -150,7 +150,7 @@ class Nodebb {
 
         $userConfig = static::getUserConfigForUser($username);
         $provider = static::authenticateForUser($userConfig);
-        $result = $provider->setApiPrefix(static::$apiPrefix)
+        $result = $provider->setApiPrefix('/api/v2')
             ->getTopicModel()->createTopic($params);
 
         return static::handleResult($result);
@@ -177,7 +177,7 @@ class Nodebb {
     public static function deleteTopic($tid)
     {
         $provider = static::authenticateForUser();
-        $result = $provider->setApiPrefix(static::$apiPrefix)
+        $result = $provider->setApiPrefix('/api/v2')
             ->getTopicModel()->deleteTopic($tid);
 
         return static::handleResult($result);
@@ -186,7 +186,7 @@ class Nodebb {
     public static function vote($pid, $data)
     {
         $provider = static::authenticateForUser();
-        $result = $provider->setApiPrefix(static::$apiPrefix)
+        $result = $provider->setApiPrefix('/api/v2')
             ->getPostModel()->vote($pid, $data);
 
         return static::handleResult($result);
@@ -195,7 +195,7 @@ class Nodebb {
     public static function unvote($pid)
     {
         $provider = static::authenticateForUser();
-        $result = $provider->setApiPrefix(static::$apiPrefix)
+        $result = $provider->setApiPrefix('/api/v2')
             ->getPostModel()->unvote($pid);
 
         return static::handleResult($result);
@@ -244,7 +244,7 @@ class Nodebb {
             $provider = static::authenticateForUser();
         }
 
-        $result = $provider->setApiPrefix(static::$apiPrefix)
+        $result = $provider->setApiPrefix('/api/v2')
             ->getUserModel()
             ->updateUser($nodebbUserId, [
                 '_uid' => $nodebbUserId,
@@ -267,7 +267,7 @@ class Nodebb {
             $provider = static::authenticateForUser();
         }
 
-        $result = $provider->setApiPrefix(static::$apiPrefix)
+        $result = $provider->setApiPrefix('/api/v2')
             ->getUserModel()
             ->updateUser($nodebbUserId, [
                 '_uid' => $nodebbUserId,

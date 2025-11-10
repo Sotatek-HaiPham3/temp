@@ -3,11 +3,6 @@
 namespace App\Http\Services;
 
 use App\Consts;
-use App\Events\CommunityInfoUpdated;
-use App\Events\CommunityNameChangeRequestUpdated;
-use App\Models\Community;
-use App\Models\Gallery;
-use App\Models\CommunityNameChangeRequests;
 use App\Models\User;
 use App\Models\SocicalNetwork;
 use App\Models\Setting;
@@ -39,11 +34,6 @@ use App\Models\Ranking;
 use App\Models\Tasking;
 use App\Models\TaskingReward;
 use App\Models\ExperiencePoint;
-use App\Models\RoomCategory;
-use App\Models\VoiceChatRoom;
-use App\Models\VoiceGroupManager;
-use App\Models\SmsSetting;
-use App\Utils\CommunityUtils;
 use Auth;
 use Exception;
 use Mail;
@@ -147,24 +137,7 @@ class AdminService {
     public function editGame($id)
     {
         return Game::with(['platforms', 'servers', 'ranks'])
-            ->select(
-                'id',
-                'title',
-                'slug',
-                'is_active',
-                'logo',
-                'portrait',
-                'thumbnail',
-                'thumbnail_hover',
-                'thumbnail_active',
-                'banner',
-                'cover',
-                'order',
-                'auto_order',
-                'ios_app_id',
-                'android_app_id',
-                'portrait_background'
-            )
+            ->select('id', 'title', 'slug', 'is_active', 'logo', 'portrait', 'thumbnail', 'thumbnail_hover', 'thumbnail_active', 'banner', 'cover', 'order', 'auto_order')
             ->where('id', $id)
             ->first();
     }
@@ -207,7 +180,6 @@ class AdminService {
         $banner = Utils::saveFileToStorage($input['banner'], 'data/g', "{$slug}_banner");
         $portrait = Utils::saveFileToStorage($input['portrait'], 'data/g', "{$slug}_portrait");
         $cover = Utils::saveFileToStorage($input['cover'], 'data/g', "{$slug}_cover");
-        $portraitBackground = Utils::saveFileToStorage($input['portrait_background'], 'data/g', "{$slug}_portrait_background");
         $max_order = Game::orderBy('order', 'desc')->value('order');
         $game = Game::create([
             'title' => $input['title'],
@@ -221,10 +193,7 @@ class AdminService {
             'cover' => $cover,
             'is_active' => $input['is_active'],
             'order' => $input['order'],
-            'auto_order' => $input['auto_order'],
-            'ios_app_id' => array_get($input, 'ios_app_id'),
-            'android_app_id' => array_get($input, 'android_app_id'),
-            'portrait_background' => $portraitBackground
+            'auto_order' => $input['auto_order']
         ]);
         $this->updateGameOrderOnCreate($game, $input['order'], $max_order);
 
@@ -255,8 +224,8 @@ class AdminService {
     public function updateGameOrderOnCreate($gameCreated, $newOrd, $max_order)
     {
         if ($newOrd > $max_order) {
-            $gameCreated->order = $max_order + 1;
-            $gameCreated->save();
+            $gameUpdated->order = $max_order + 1;
+            $gameUpdated->save();
             return;
         }
 
@@ -341,7 +310,6 @@ class AdminService {
         $banner = @file_exists($input['banner']) ? Utils::saveFileToStorage($input['banner'], 'data/g', "{$slug}_banner") : $input['banner'];
         $portrait = @file_exists($input['portrait']) ? Utils::saveFileToStorage($input['portrait'], 'data/g', "{$slug}_portrait") : $input['portrait'];
         $cover = @file_exists($input['cover']) ? Utils::saveFileToStorage($input['cover'], 'data/g', "{$slug}_cover") : $input['cover'];
-        $portraitBackground = @file_exists($input['portrait_background']) ? Utils::saveFileToStorage($input['portrait_background'], 'data/g', "{$slug}_portrait_background") : $input['portrait_background'];
 
         $game = Game::findOrFail($input->id);
         $game->title = $input['title'];
@@ -355,9 +323,6 @@ class AdminService {
         $game->banner = $banner;
         $game->portrait = $portrait;
         $game->cover = $cover;
-        $game->ios_app_id = array_get($input, 'ios_app_id');
-        $game->android_app_id = array_get($input, 'android_app_id');
-        $game->portrait_background = $portraitBackground;
         $game->save();
 
         $max_order = Game::orderBy('order', 'desc')->value('order');
@@ -525,7 +490,7 @@ class AdminService {
             ->paginate(array_get($input, 'limit', Consts::DEFAULT_PER_PAGE));
     }
 
-    public function getUserBalances($input)
+    public function getUserBalances($input) 
     {
         return User::join('user_balances', 'user_balances.id', 'users.id')
                 ->select('users.id as id', 'users.full_name', 'users.email', 'user_balances.coin', 'user_balances.bar')
@@ -1109,6 +1074,7 @@ class AdminService {
         ];
 
         return Setting::select('key', 'value')
+            ->whereIn('key', Consts::KEY_SETTINGS_ADMIN)
             ->get()
             ->keyBy('key')
             ->transform(function ($item) use ($booleanValues) {
@@ -1247,7 +1213,7 @@ class AdminService {
 
         CalculateUserRatingWhenRemoveReview::dispatchNow($sessionReview->user_id, $sessionReview);
 
-        return [];
+        return 'ok';
     }
 
     public function getGamelancerInfoDetail($id)
@@ -1260,8 +1226,7 @@ class AdminService {
     public function getUsernames($input)
     {
         $searchKey = Utils::escapeLike(array_get($input, 'search_key', ''));
-        return User::withoutAppends()
-            ->select('id', 'username')
+        return User::select('id', 'username')
             ->when(!empty($searchKey), function ($query) use ($searchKey) {
                 $query->where('username', 'like', "%{$searchKey}%");
             })
@@ -1322,7 +1287,7 @@ class AdminService {
         $userRestrictPricing = UserRestrictPricing::find($id);
         $userRestrictPricing->delete();
 
-        return [];
+        return 'ok';
     }
 
     public function getRankings($input)
@@ -1526,244 +1491,5 @@ class AdminService {
         $setting->save();
 
         return $setting;
-    }
-
-    public function getRoomCategories($params)
-    {
-        return RoomCategory::when(!empty($params['sort']) && !empty($params['sort_type']), function ($query) use ($params) {
-                $query->orderBy($params['sort'], $params['sort_type']);
-            }
-        )
-        ->paginate(array_get($params, 'limit', Consts::DEFAULT_PER_PAGE));
-    }
-
-    public function createRoomCategory($params)
-    {
-        $existsCategoryByGameId = RoomCategory::where('game_id', array_get($params, 'game_id'))->exists();
-        if ($existsCategoryByGameId) {
-            throw new Exception('The category for game exists.');
-        }
-
-        $image = Utils::saveFileToStorage($params['image'], 'data/v');
-        $room = RoomCategory::create([
-            'game_id' => array_get($params, 'game_id'),
-            'type' => array_get($params, 'type', Consts::CATEGORY_TYPE_USERNAME),
-            'size_range' => array_get($params, 'size_range'),
-            'label' => array_get($params, 'label'),
-            'image' => $image,
-            'description' => array_get($params, 'description'),
-            'pinned' => array_get($params, 'pinned')
-        ]);
-
-        MasterdataService::clearCacheOneTable('room_categories');
-
-        return $room;
-    }
-
-    public function updateRoomCategory($params)
-    {
-        $image = @file_exists($params['image']) ? Utils::saveFileToStorage($params['image'], 'data/v') : $params['image'];
-        $category = RoomCategory::where('id', array_get($params, 'id'))->first();
-
-        $categoryCallingExists = VoiceChatRoom::where('game_id', $category->game_id)
-            ->where('status', Consts::VOICE_ROOM_STATUS_CALLING)
-            ->exists();
-
-        if ($categoryCallingExists) {
-            throw new Exception('You cannot update the category because another call is in progress.');
-        }
-
-        $category->update([
-            'type' => array_get($params, 'type', Consts::CATEGORY_TYPE_USERNAME),
-            'size_range' => array_get($params, 'size_range'),
-            'label' => array_get($params, 'label'),
-            'image' => $image,
-            'description' => array_get($params, 'description'),
-            'pinned' => array_get($params, 'pinned')
-        ]);
-
-        if ($category->type === Consts::CATEGORY_TYPE_CHAT) {
-            // update community
-            RoomCategory::where('type', Consts::CATEGORY_TYPE_COMMUNITY)
-                ->update([
-                    'image' => $image,
-                    'description' => array_get($params, 'description')
-                ]);
-        }
-
-        MasterdataService::clearCacheOneTable('room_categories');
-
-        return $category;
-    }
-
-    public function deleteRoomCategory($categoryId)
-    {
-        $chattingCategory = RoomCategory::where('id', $categoryId)
-            ->where('game_id', Consts::CHATTING_ROOM_CATEGORY_GAME_ID)
-            ->exists();
-
-        if ($chattingCategory) {
-            throw new Exception('You cannot delete default category.');
-        }
-
-        $deleteRoom = RoomCategory::where('id', $categoryId)->delete();
-
-        MasterdataService::clearCacheOneTable('room_categories');
-
-        return $deleteRoom;
-    }
-
-    public function getRoomUserRole($params)
-    {
-        return VoiceGroupManager::select('voice_group_managers.*', 'users.username as username')
-            ->join('users', 'users.id', 'voice_group_managers.user_id')
-            ->paginate(array_get($params, 'limit', Consts::DEFAULT_PER_PAGE));
-    }
-
-    public function makeRoomUserRole($userId, $role)
-    {
-        $userRole = VoiceGroupManager::updateOrCreate(
-            ['user_id' => $userId],
-            ['role' => $role]
-        );
-        return $userRole;
-    }
-
-    public function removeRoomUserRole($userId)
-    {
-        $userRole = VoiceGroupManager::where('user_id', $userId)->delete();
-        return $userRole;
-    }
-
-    public function getListCommunityRequestNameChange($params)
-    {
-        return CommunityNameChangeRequests::select('community_name_change_requests.*', 'reasons.content as reason', 'users.username as username')
-            ->join('users', 'users.id', 'community_name_change_requests.request_user_id')
-            ->join('reasons', 'reasons.id', 'community_name_change_requests.reason_id')
-            ->orderBy('id', 'desc')
-            ->paginate(array_get($params, 'limit', Consts::DEFAULT_PER_PAGE));
-    }
-
-    public function approveRejectRequestNameChange($params)
-    {
-        switch ($params['status']) {
-            case Consts::COMMUNITY_STATUS_APPROVED:
-                $this->approveRequestNameChange($params);
-                break;
-            case Consts::COMMUNITY_STATUS_REJECT:
-                $this->sendRejectedChangeNameNotification($params['request_user_id']);
-                break;
-            default:
-                break;
-        }
-
-        $data = CommunityNameChangeRequests::where('id', $params['id'])->first();
-        $data->status = $params['status'];
-        $data->save();
-        event(new CommunityNameChangeRequestUpdated($data));
-        return $data;
-    }
-
-    public function approveRequestNameChange($params)
-    {
-        // check exists
-        $alreadyName = Community::where('name', $params['new_name'])->exists();
-        if ($alreadyName) {
-            throw new Exception('The new name has already been taken.');
-        }
-        $slug = CommunityUtils::buildChannelSlug($params['new_name']);
-
-        Community::where('id', $params['community_id'])->update(['name' => $params['new_name'], 'slug' => $slug]);
-        $community = Community::where('id', $params['community_id'])
-            ->withTrashed()
-            ->first();
-        event(new CommunityInfoUpdated($community));
-        $this->sendApprovedChangeNameNotification($params['request_user_id']);
-    }
-
-    private function sendApprovedChangeNameNotification($receiverId)
-    {
-        $notificationParams = [
-            'user_id' => $receiverId,
-            'type' => Consts::NOTIFY_TYPE_COMMUNITY_APPROVED_CHANGE_NAME,
-            'message' => Consts::MESSAGE_NOTIFY_COMMUNITY_APPROVED_CHANGE_NAME,
-            'props' => [],
-            'data' => []
-        ];
-
-        $this->fireNotification(Consts::NOTIFY_TYPE_COMMUNITY, $notificationParams);
-    }
-
-    private function sendRejectedChangeNameNotification($receiverId)
-    {
-        $notificationParams = [
-            'user_id' => $receiverId,
-            'type' => Consts::NOTIFY_TYPE_COMMUNITY_REJECTED_CHANGE_NAME,
-            'message' => Consts::MESSAGE_NOTIFY_COMMUNITY_REJECT_CHANGE_NAME,
-            'props' => [],
-            'data' => []
-        ];
-        $this->fireNotification(Consts::NOTIFY_TYPE_COMMUNITY, $notificationParams);
-    }
-
-    public function getSmsSetting()
-    {
-        return SmsSetting::get();
-    }
-
-    public function updateSmsSetting($params)
-    {
-        $smsSetting = SmsSetting::updateOrCreate(
-            [
-                'id' => $params['id']
-            ],
-            [
-                'max_price' => $params['max_price'],
-                'rate_limit_price' => $params['rate_limit_price'],
-                'rate_limit_ttl' => $params['rate_limit_ttl'],
-                'rate_limit' => $params['rate_limit'],
-                'white_list' => $params['white_list'],
-                'rate_list' => $params['rate_list']
-            ]
-        );
-
-        return $smsSetting;
-    }
-
-    public function getGallery ($params)
-    {
-        return Gallery::paginate(array_get($params, 'limit', Consts::DEFAULT_PER_PAGE));
-    }
-
-    public function createGallery ($input)
-    {
-        $web = Utils::saveFileToStorage($input['web_url'], 'data/c');
-        $app = Utils::saveFileToStorage($input['app_url'], 'data/c');
-
-        $gallery = Gallery::insert(['web_url' => $web, 'app_url' => $app]);
-
-        MasterdataService::clearCacheOneTable('gallery');
-        return $gallery;
-    }
-
-    public function updateGallery ($input)
-    {
-        $web = @file_exists($input['web_url']) ? Utils::saveFileToStorage($input['web_url'], 'data/c') : $input['web_url'];
-        $app = @file_exists($input['app_url']) ? Utils::saveFileToStorage($input['app_url'], 'data/c') : $input['app_url'];
-
-        $gallery = Gallery::find($input['id']);
-        $gallery->web_url = $web;
-        $gallery->app_url = $app;
-        $gallery->save();
-
-        MasterdataService::clearCacheOneTable('gallery');
-        return $gallery;
-    }
-
-    public function deleteGallery ($input)
-    {
-        $delete = Gallery::where('id', $input['id'])->delete();
-        MasterdataService::clearCacheOneTable('gallery');
-        return $delete;
     }
 }

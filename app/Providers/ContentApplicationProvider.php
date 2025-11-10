@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use SevenShores\Hubspot\Factory;
 use App\Http\Services\ContentApplication;
 
 class ContentApplicationProvider extends ServiceProvider {

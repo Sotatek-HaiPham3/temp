@@ -7,10 +7,7 @@ RUN apt-get update &&\
     curl -sL https://deb.nodesource.com/setup_10.x | bash - &&\
     mkdir -p /usr/share/man/man1 &&\
     apt-get install nodejs python make g++ git unzip zip libzip-dev libcurl4-openssl-dev libc-client-dev libkrb5-dev autoconf default-jre-headless cron p7zip-full vim zlib1g-dev mariadb-client libpng-dev supervisor -y &&\
-    curl -sS https://getcomposer.org/installer -o composer-setup.php &&\
-    php composer-setup.php --install-dir=/usr/bin --filename=composer --1 &&\
-    rm composer-setup.php &&\
-    composer config --global process-timeout 3600 &&\
+    curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer --1 &&\
     docker-php-ext-configure gd --with-png-dir=/usr/include/ && \
     docker-php-ext-install -j$(nproc) gd &&\
     docker-php-ext-install pdo_mysql bcmath curl opcache zip &&\

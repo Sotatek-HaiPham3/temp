@@ -26,7 +26,7 @@ class DailyCheckinCollected extends AppBroadcastEvent
     public function __construct($userId, $checkin)
     {
         $this->userId = $userId;
-        $this->data = cloneDeep($checkin);
+        $this->data = $checkin;
     }
 
     /**

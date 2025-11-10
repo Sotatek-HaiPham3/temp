@@ -1,223 +1,63 @@
 <template>
   <div id="site-setting">
-    <div class="setting-row col-lg-6 col-xs-12">
+    <div id="vip-setting" class="setting-row col-lg-6 col-xs-12">
       <div class="wrap-content">
-        <h4>Socials</h4>
-        <div class="block clearfix">
-          <div class="setting-title label-url"><span>Monthly Views</span></div>
-          <div class="input-custom">
-            <input class="form-control"
-                   type="text"
-                   name="total_monthly_views"
-                   v-validate.disable="'required'"
-                   @focus="resetError"
-                   placeholder="Total Monthly Views"
-                   v-model="settings.total_monthly_views">
-          </div>
-        </div>
-        <div class="block clearfix">
-          <div class="setting-title label-url"><span>Followers</span></div>
-          <div class="input-custom">
-            <input class="form-control"
-                   type="text"
-                   name="total_followers"
-                   v-validate.disable="'required'"
-                   @focus="resetError"
-                   placeholder="Total Followers"
-                   v-model="settings.total_followers">
-          </div>
-        </div>
-        <div class="block clearfix">
-          <div class="setting-title label-url"><span>Snapchat Subscribers</span></div>
-          <div class="input-custom">
-            <input class="form-control"
-                   type="text"
-                   name="total_followers"
-                   v-validate.disable="'required'"
-                   @focus="resetError"
-                   placeholder="Snapchat Subscribers"
-                   v-model="settings.snapchat_subscribers">
-          </div>
-        </div>
-        <div class="block clearfix">
-          <div class="setting-title label-url"><span>Snapchat Egirl Subscribers</span></div>
-          <div class="input-custom">
-            <input class="form-control"
-                   type="text"
-                   name="total_followers"
-                   v-validate.disable="'required'"
-                   @focus="resetError"
-                   placeholder="Snapchat Egirl Subscribers"
-                   v-model="settings.snapchat_egirl_subscribers">
-          </div>
-        </div>
-        <div class="block clearfix">
-          <div class="setting-title label-url"><span>Snapchat Minecraft Subscribers</span></div>
-          <div class="input-custom">
-            <input class="form-control"
-                   type="text"
-                   name="total_followers"
-                   v-validate.disable="'required'"
-                   @focus="resetError"
-                   placeholder="Snapchat Minecraft Subscribers"
-                   v-model="settings.snapchat_minecraft_subscribers">
-          </div>
-        </div>
-        <div class="block clearfix">
-          <div class="setting-title label-url"><span>Snapchat GTA Subscribers</span></div>
-          <div class="input-custom">
-            <input class="form-control"
-                   type="text"
-                   name="total_followers"
-                   v-validate.disable="'required'"
-                   @focus="resetError"
-                   placeholder="Snapchat GTA Subscribers"
-                   v-model="settings.snapchat_gta_subscribers">
-          </div>
-        </div>
-        <div class="block clearfix">
-          <div class="setting-title label-url"><span>Snapchat Gamelancer Subscribers</span></div>
-          <div class="input-custom">
-            <input class="form-control"
-                   type="text"
-                   name="total_followers"
-                   v-validate.disable="'required'"
-                   @focus="resetError"
-                   placeholder="Snapchat Gamelancer Subscribers"
-                   v-model="settings.snapchat_gamelancer_subscribers">
-          </div>
-        </div>
-        <div class="block clearfix">
-          <div class="setting-title label-url"><span>Snapchat Gaming Subscribers</span></div>
-          <div class="input-custom">
-            <input class="form-control"
-                   type="text"
-                   name="total_followers"
-                   v-validate.disable="'required'"
-                   @focus="resetError"
-                   placeholder="Snapchat Gaming Subscribers"
-                   v-model="settings.snapchat_gaming_subscribers">
-          </div>
-        </div>
-        <div class="block clearfix">
-          <div class="setting-title label-url"><span>Snapchat Game Gear Subscribers</span></div>
-          <div class="input-custom">
-            <input class="form-control"
-                   type="text"
-                   name="total_followers"
-                   v-validate.disable="'required'"
-                   @focus="resetError"
-                   placeholder="Snapchat Game Gear Subscribers"
-                   v-model="settings.snapchat_game_gear_subscribers">
-          </div>
-        </div>
-
-        <div class="block clearfix">
-          <div class="setting-title label-url"><span>TikTok Gaming Followers</span></div>
-          <div class="input-custom">
-            <input class="form-control"
-                   type="text"
-                   name="total_followers"
-                   v-validate.disable="'required'"
-                   @focus="resetError"
-                   placeholder="TikTok Gaming Followers"
-                   v-model="settings.tiktok_gaming_followers">
-          </div>
-        </div>
-        <div class="block clearfix">
-          <div class="setting-title label-url"><span>TikTok Gaming Likes</span></div>
-          <div class="input-custom">
-            <input class="form-control"
-                   type="text"
-                   name="total_followers"
-                   v-validate.disable="'required'"
-                   @focus="resetError"
-                   placeholder="TikTok Gaming Likes"
-                   v-model="settings.tiktok_gaming_likes">
-          </div>
-        </div>
-
-        <div class="block clearfix">
-          <div class="setting-title label-url"><span>TikTok Gamelancer Followers</span></div>
-          <div class="input-custom">
-            <input class="form-control"
-                   type="text"
-                   name="total_followers"
-                   v-validate.disable="'required'"
-                   @focus="resetError"
-                   placeholder="TikTok Gamelancer Followers"
-                   v-model="settings.tiktok_gamelancer_followers">
-          </div>
-        </div>
-        <div class="block clearfix">
-          <div class="setting-title label-url"><span>TikTok Gamelancer Likes</span></div>
-          <div class="input-custom">
-            <input class="form-control"
-                   type="text"
-                   name="total_followers"
-                   v-validate.disable="'required'"
-                   @focus="resetError"
-                   placeholder="TikTok Gamelancer Likes"
-                   v-model="settings.tiktok_gamelancer_likes">
-          </div>
-        </div>
-
-        <div class="block clearfix">
-          <div class="setting-title label-url"><span>TikTok Gamer Followers</span></div>
-          <div class="input-custom">
-            <input class="form-control"
-                   type="text"
-                   name="total_followers"
-                   v-validate.disable="'required'"
-                   @focus="resetError"
-                   placeholder="TikTok Gamer Followers"
-                   v-model="settings.tiktok_gamer_followers">
-          </div>
-        </div>
-        <div class="block clearfix">
-          <div class="setting-title label-url"><span>TikTok Gamer Likes</span></div>
-          <div class="input-custom">
-            <input class="form-control"
-                   type="text"
-                   name="total_followers"
-                   v-validate.disable="'required'"
-                   @focus="resetError"
-                   placeholder="TikTok Gamer Likes"
-                   v-model="settings.tiktok_gamer_likes">
-          </div>
-        </div>
-
-        <div class="block clearfix">
-          <div class="setting-title label-url"><span>TikTok Egirl Followers</span></div>
-          <div class="input-custom">
-            <input class="form-control"
-                   type="text"
-                   name="total_followers"
-                   v-validate.disable="'required'"
-                   @focus="resetError"
-                   placeholder="TikTok Egirl Followers"
-                   v-model="settings.tiktok_egirl_followers">
-          </div>
-        </div>
-        <div class="block clearfix">
-          <div class="setting-title label-url"><span>TikTok Egirl Likes</span></div>
-          <div class="input-custom">
-            <input class="form-control"
-                   type="text"
-                   name="total_followers"
-                   v-validate.disable="'required'"
-                   @focus="resetError"
-                   placeholder="TikTok Egirl Likes"
-                   v-model="settings.tiktok_egirl_likes">
-          </div>
-        </div>
-
+        <h4>Gamelancer Vip</h4>
+        <span class="setting-title">Auto Approve Gamelancer</span>
+        <label class="switch">
+          <input type="checkbox"
+                v-model="settings.vip_link_approve"
+                :checked="settings.vip_link_approve == 1 ? true : false">
+          <span class="slider round"></span>
+        </label>
         <div class="clearfix"></div>
-        <button type="button" class="btn btn_save_setting" :id="TARGET_BUTTON.SOCIAL_SETTING" @click.stop="onClickSaveSettings($event)">
+        <button type="button" class="btn btn_save_setting" :id="TARGET_BUTTON.VIP" @click.stop="onClickSaveSettings($event)">
           Save
         </button>
       </div>
     </div>
+
+    <div id="video-setting" class="setting-row col-lg-6 col-xs-12">
+      <div class="wrap-content">
+        <h4>Background Video</h4>
+        <div class="setting-title label-url"><span>Video url</span></div>
+        <div class="input-custom">
+          <input class="form-control"
+            type="text"
+            name="url"
+            v-validate.disable="'required'"
+            @focus="resetError"
+            placeholder="https://www.youtube.com/"
+            v-model="settings.background_video_url">
+
+          <span v-show="errors.has('url')" class="error has-error">
+            {{ errors.first('url') }}
+          </span>
+        </div>
+        <div class="clearfix"></div>
+        <button type="button" class="btn btn_save_setting" :id="TARGET_BUTTON.VIDEO" @click.stop="onClickSaveSettings($event)">
+          Save
+        </button>
+      </div>
+    </div>
+
+    <div id="vip-setting" class="setting-row col-lg-6 col-xs-12">
+      <div class="wrap-content">
+        <h4>Bounty Feature</h4>
+        <span class="setting-title">Configure Pull Down/Go Live</span>
+        <label class="switch">
+          <input type="checkbox"
+                v-model="settings.visible_bounty_feature"
+                :checked="settings.visible_bounty_feature == 1 ? true : false">
+          <span class="slider round"></span>
+        </label>
+        <div class="clearfix"></div>
+        <button type="button" class="btn btn_save_setting" :id="TARGET_BUTTON.BOUNTY" @click.stop="onClickSaveSettings($event)">
+          Save
+        </button>
+      </div>
+    </div>
+
     <div id="vip-setting" class="setting-row col-lg-6 col-xs-12">
       <div class="wrap-content">
         <h4>Clear Cache</h4>
@@ -227,6 +67,7 @@
         </button>
       </div>
     </div>
+
   </div>
 </template>
 
@@ -237,7 +78,6 @@
     VIP: 'btnSaveVip',
     VIDEO: 'btnSaveVideo',
     BOUNTY: 'btnSaveBounty',
-    SOCIAL_SETTING: 'btnSaveSocialSetting'
   }
 
   export default {
@@ -309,7 +149,6 @@
             }
             break
         }
-        this.params = this.settings
 
         return rf.getRequest('SettingRequest').updateSiteSettings(this.params)
           .then(res => {
@@ -347,12 +186,6 @@
       background-color: #fff;
       padding: 20px;
       min-height: 190px;
-    }
-
-    .block {
-      .setting-title {
-        width: 40%;
-      }
     }
 
     .setting-title {

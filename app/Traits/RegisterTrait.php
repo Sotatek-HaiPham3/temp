@@ -2,7 +2,6 @@
 
 namespace App\Traits;
 
-use App\Mails\RegisterVerificationMailQueue;
 use App\Models\User;
 use App\Models\SocialUser;
 use App\Utils;
@@ -11,15 +10,14 @@ use DB;
 use Exception;
 use Mail;
 use App\Mails\VerificationMailQueue;
+use App\Jobs\PushAcountInfoHubSpotJob;
 use App\Jobs\CreateMattermostUserEndpoint;
-use App\Jobs\SendSmsNotificationJob;
+use App\Jobs\CreateNodebbUserEndpoint;
 use Illuminate\Auth\Events\Registered;
 use Carbon\Carbon;
 use App\Http\Services\MattermostService;
 use App\Exceptions\Reports\MattermostException;
-use App\Exceptions\Reports\InvalidCodeException;
 use App\PhoneUtils;
-use App\Utils\OtpUtils;
 use Aws;
 
 trait RegisterTrait {
@@ -34,6 +32,7 @@ trait RegisterTrait {
             DB::commit();
 
             event(new Registered($user));
+            PushAcountInfoHubSpotJob::dispatch($user);
 
             $data = [
                 'when' => 'signup',
@@ -43,6 +42,8 @@ trait RegisterTrait {
                 ]
             ];
             Aws::performFirehosePut($data, $user);
+
+            CreateNodebbUserEndpoint::dispatch($user)->onQueue(Consts::CREATE_NODEBB_USER_ENDPOINT_QUEUE);
 
             CreateMattermostUserEndpoint::dispatchNow($user);
 
@@ -68,39 +69,25 @@ trait RegisterTrait {
 
     private function createUser($data, $options = [])
     {
-        if (empty(array_get($data, 'email'))) {
-            $data['email'] = Utils::generateAutoEmail();
-        }
-
-        $hasPhoneNumber = !empty(array_get($data, 'phone_number'));
-
         $user = User::firstOrNew([
-            'email' => strtolower(array_get($data, 'email'))
+            'email' => strtolower($data['email'])
         ]);
 
-        $password = array_get($data, 'password');
-        $user->password = $password ? bcrypt($password) : null;
-        $user->dob = array_get($data, 'dob');
-        $user->username = array_get($data, 'username');
+        $password = bcrypt(array_get($data, 'password', Utils::generateRandomString(Consts::PASSWORD_SOCIAL_LENGTH)));
+        $user->password = $password;
+        $user->dob = $data['dob'];
+        $user->username = $data['username'];
+        $user->sex = $data['sex'];
         $user->status = Consts::USER_ACTIVE;
 
         $user->languages = [Consts::DEFAULT_LOCALE];
 
-        $user->phone_country_code = $hasPhoneNumber ? PhoneUtils::getCountryCodeByFullPhoneNumber(array_get($data, 'phone_number')) : null;
-        $user->phone_number = $hasPhoneNumber ? array_get($data, 'phone_number') : null;
+        $user->phone_country_code = $data['phone_country_code'];
+        $user->phone_number = PhoneUtils::makePhoneNumber($data['phone_number'], $data['phone_country_code']);
 
-        if (!empty(array_get($data, 'languages'))) {
-            $user->languages = array_get($data, 'languages');
+        if (isset($data['languages'])) {
+            $user->languages = $data['languages'];
         }
-
-        if ($hasPhoneNumber && !empty(array_get($data, 'validate_code'))) {
-            $user->phone_verified = OtpUtils::confirmValidateCode($user->phone_number, array_get($data, 'validate_code')) ? Consts::TRUE : Consts::FALSE;
-        }
-
-        if (!$hasPhoneNumber && !empty(array_get($data, 'validate_code'))) {
-            $user->email_verified = OtpUtils::confirmEmailValidateCodeToCache($data['email'], array_get($data, 'validate_code')) ? Consts::TRUE : Consts::FALSE;
-        }
-
         $user->save();
 
         DB::table('user_settings')->insert(['id' => $user->id]);
@@ -119,47 +106,8 @@ trait RegisterTrait {
         $socialUser = new SocialUser;
         $socialUser->provider = $provider;
         $socialUser->provider_id= $providerUser->id;
-        $socialUser->email = !empty($providerUser->email) ? strtolower($providerUser->email) : null;
-        $socialUser->phone_number = !empty($providerUser->phone) ? $providerUser->phone : null;
+        $socialUser->email = strtolower($providerUser->email);
 
         $user->socialUser()->save($socialUser);
-    }
-
-    public function sendValidateCode($params)
-    {
-        $code = Utils::generateRandomString(Consts::VERIFY_CODE_LENGTH, Consts::VERIFY_CODE_STRING);
-        OtpUtils::initValidateCodeToCache($params['phone_number'], $code);
-
-        SendSmsNotificationJob::dispatch(
-            $params['phone_number'],
-            Consts::NOTIFY_SMS_APP_VALIDATE_CODE,
-            ['code' => $code]
-        );
-        return true;
-    }
-
-    public function confirmValidateCode($phoneNumber, $code)
-    {
-        if (OtpUtils::confirmValidateCode($phoneNumber, $code, false)) {
-            return true;
-        }
-        throw new InvalidCodeException();
-    }
-
-    public function sendEmailValidateCode($params)
-    {
-        $code = Utils::generateRandomString(Consts::VERIFY_CODE_LENGTH, Consts::VERIFY_CODE_STRING);
-        OtpUtils::initEmailValidateCodeToCache($params['email'], $code);
-
-        Mail::queue(new RegisterVerificationMailQueue($params['email'], Consts::DEFAULT_LOCALE, $code));
-        return true;
-    }
-
-    public function confirmEmailValidateCode($email, $code)
-    {
-        if (OtpUtils::confirmEmailValidateCodeToCache($email, $code, false)) {
-            return true;
-        }
-        throw new InvalidCodeException();
     }
 }

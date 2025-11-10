@@ -4,7 +4,6 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Support\Facades\Auth;
-use App\Exceptions\Reports\PermissionDenyException;
 
 class AuthenticateGamelancer
 {
@@ -20,6 +19,6 @@ class AuthenticateGamelancer
         if (Auth::check() && Auth::user()->isGamelancer) {
             return $next($request);
         }
-        throw new PermissionDenyException();
+        return response()->json(['message' => __('Permission denied.')], 403);
     }
 }

@@ -64,26 +64,14 @@ class SendSmsNotificationJob implements ShouldQueue
             case Consts::NOTIFY_SMS_PHONE_CODE:
                 SystemNotification::sendChangePhoneNumber($this->modelable, array_get($this->params, 'code'));
                 break;
-            case Consts::NOTIFY_SMS_PASSWORD_LINK:
-                SystemNotification::sendResetPasswordLink($this->modelable, array_get($this->params, 'token'));
-                break;
             case Consts::NOTIFY_SMS_PASSWORD_CODE:
-                SystemNotification::sendResetPasswordCode($this->modelable, array_get($this->params, 'code'));
+                SystemNotification::sendResetPasswordCode($this->modelable, array_get($this->params, 'token'));
                 break;
             case Consts::NOTIFY_SMS_USERNAME_CODE:
                 SystemNotification::sendVerifyCodeChangeUsername($this->modelable, array_get($this->params, 'code'));
                 break;
             case Consts::NOTIFY_SMS_CONFIRMATION_CODE:
                 SystemNotification::sendConfirmationCode($this->modelable, array_get($this->params, 'code'));
-                break;
-            case Consts::NOTIFY_SMS_APP_VALIDATE_CODE:
-                SystemNotification::sendValidateCode($this->modelable, array_get($this->params, 'code'));
-                break;
-            case Consts::NOTIFY_SMS_APP_LOGIN_CODE:
-                SystemNotification::sendLoginCode($this->modelable, array_get($this->params, 'code'));
-                break;
-            case Consts::NOTIFY_SMS_AUTHORIZATION_CODE:
-                SystemNotification::sendAuthorizationCode($this->modelable, array_get($this->params, 'code'));
                 break;
             default:
                 // To do handle something else

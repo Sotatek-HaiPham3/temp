@@ -34,7 +34,7 @@ class PaypalService
 
     public function __construct()
     {
-        self::initApiContext();
+        // self::initApiContext();
     }
 
     private function initApiContext()

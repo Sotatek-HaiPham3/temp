@@ -26,7 +26,7 @@ class DeclineVoiceCall extends AppBroadcastEvent
     public function __construct($userId, $channelId)
     {
         $this->userId   = $userId;
-        $this->data     = cloneDeep($channelId);
+        $this->data     = $channelId;
     }
 
     /**

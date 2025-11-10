@@ -11,20 +11,9 @@ use App\Http\Services\MasterdataService;
 
 class PhoneUtils
 {
-    public static function formatPhoneNumber($phoneNumber, $format = PhoneNumberFormat::E164) {
+    public static function makePhoneNumber($phoneNumber, $phoneCountryCode, $format = PhoneNumberFormat::E164) {
         try {
-            return PhoneNumber::make($phoneNumber)->format($format);
-        } catch (Exception $e) {
-            throw ValidationException::withMessages([
-                'phone_number' => [__('exceptions.phone_number.invalid')]
-            ]);
-        }
-    }
-
-    public static function getCountryCodeByFullPhoneNumber($phoneNumber)
-    {
-        try {
-            return PhoneNumber::make($phoneNumber)->getCountry();
+            return PhoneNumber::make($phoneNumber, $phoneCountryCode)->format($format);
         } catch (Exception $e) {
             throw ValidationException::withMessages([
                 'phone_number' => [__('exceptions.phone_number.invalid')]
@@ -34,7 +23,6 @@ class PhoneUtils
 
     public static function allowSmsNotification($user)
     {
-        return true;
         return MasterdataService::getOneTable('sms_whitelists')->contains(function ($record) use ($user) {
             return strtolower($record->country_code) === strtolower($user->phone_country_code);
         });

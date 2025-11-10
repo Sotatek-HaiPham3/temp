@@ -2,15 +2,10 @@
 
 namespace App\Traits;
 
-use Twilio\Rest\Client;
 use App\Notifications\SendSmsNotification;
 use App\Models\User;
-use App\Models\SmsSetting;
 use App\Consts;
 use Auth;
-use NotificationChannels\Twilio\TwilioSmsMessage;
-use NotificationChannels\Twilio\Twilio;
-use Illuminate\Support\Facades\Cache;
 
 trait SmsTrait {
     public static function sendVerifyCode(User $user)
@@ -20,23 +15,17 @@ trait SmsTrait {
         static::sendSms($user, $content);
     }
 
-    public static function sendChangePhoneNumber($phoneNumber, $code)
+    public static function sendChangePhoneNumber(User $user, $code)
     {
         $content = __('sms.change_phone_number', ['code' => $code]);
-        static::sendUnauthenticateSms($phoneNumber, $content);
-    }
-
-    public static function sendResetPasswordLink(User $user, $token)
-    {
-        $link = reset_password_url($token, $user->email, $user->username);
-        $content = __('sms.reset_password', ['link' => $link]);
 
         static::sendSms($user, $content);
     }
 
-    public static function sendResetPasswordCode(User $user, $code)
+    public static function sendResetPasswordCode(User $user, $token)
     {
-        $content = __('sms.reset_password_code', ['code' => $code]);
+        $link = reset_password_url($token, $user->email, $user->username);
+        $content = __('sms.reset_password', ['link' => $link]);
 
         static::sendSms($user, $content);
     }
@@ -52,13 +41,6 @@ trait SmsTrait {
     public static function sendConfirmationCode(User $user, $code)
     {
         $content = __('sms.social_confirmation', ['code' => $code]);
-
-        static::sendSms($user, $content);
-    }
-
-    public static function sendAuthorizationCode(User $user, $code)
-    {
-        $content = __('sms.authorization_confirmation', ['code' => $code]);
 
         static::sendSms($user, $content);
     }
@@ -160,10 +142,6 @@ trait SmsTrait {
 
     private static function sendSms(User $user, $contents)
     {
-        if (!static::canPerformSendSms($user->phone_number)) {
-            return;
-        }
-
         $user->notify(new SendSmsNotification(static::arrayToString($contents)));
     }
 
@@ -185,127 +163,5 @@ trait SmsTrait {
 
         return $contents;
     }
-
-    public static function sendValidateCode($phoneNumber, $code)
-    {
-        $content = __('sms.validate_code', ['code' => $code]);
-        static::sendUnauthenticateSms($phoneNumber, $content);
-    }
-
-    public static function sendLoginCode($phoneNumber, $code)
-    {
-        $content = __('sms.login_code', ['code' => $code]);
-        static::sendUnauthenticateSms($phoneNumber, $content);
-    }
-
-    private static function sendUnauthenticateSms($phoneNumber, $content)
-    {
-        if (!static::canPerformSendSms($phoneNumber)) {
-            return;
-        }
-
-        $client = new Client(env('TWILIO_ACCOUNT_SID'), env('TWILIO_AUTH_TOKEN'));
-        $client->messages->create(
-            $phoneNumber,
-            [
-                'from' => env('TWILIO_FROM'),
-                'body' => $content
-            ]
-        );
-    }
-
-    private static function canPerformSendSms($phoneNumber)
-    {
-        $client = $client = new Client(env('TWILIO_ACCOUNT_SID'), env('TWILIO_AUTH_TOKEN'));
-
-        $smsSetting = SmsSetting::getData();
-
-        /**
-         * Lookup our phone number...
-         */
-        $number = $client->lookups->phoneNumbers($phoneNumber)->fetch();
-        
-        /**
-         * USA and Canada are fine.
-         */
-        if (in_array($number->countryCode, $smsSetting->white_list)) {
-            logger('===========Country white listed===========: ', [$number->countryCode]);
-
-            return true;
-        }
-
-        $priceKey = static::priceKey($number->countryCode);
-        $rateKey = static::rateKey($number->countryCode);
-
-        /**
-         * CHECK OUR CACHE FOR RECENT PRICING LOOKUP HERE
-         */
-        $price = Cache::get($priceKey) ?? false;
-
-        if (!$price) {
-            /**
-             * Fetch the country pricing for that country
-             * if we don't have it cached
-             */
-            $country = $client->pricing->v1->messaging
-                           ->countries($number->countryCode)
-                           ->fetch();
-
-            /**
-             * No prices returned.
-             */
-            if (empty($country->outboundSmsPrices[0]['prices']) || !is_array($country->outboundSmsPrices[0]['prices'])) {
-                return false;
-            }
-
-            $price = $country->outboundSmsPrices[0]['prices'][0]['current_price'];
-
-            Cache::add($priceKey, $price, 86400);
-        }
-
-        /**
-         * BEYOND OUR MAX PRICE, NO TEXT ALLOWED.
-         * SAVE THE PRICE AND RATE LIMIT.
-         */
-        if ($price >= $smsSetting->max_price && !in_array($number->countryCode, $smsSetting->rate_list)) {
-            logger('===========Maximum price exceeded===========: ', [$number->countryCode, $price]);
-
-            return false;
-        }
-
-        /**
-         * PRICE FOUND ABOVE OUR RATE LIMIT..
-         */
-        $rate = Cache::get($rateKey) ?? 0;
-        if (intval($rate) >= $smsSetting->rate_limit) {
-            /**
-             * Too many requests in time period.
-             * Cooldown refreshed and incremented.
-             */
-            logger('===========Rate limit exceeded===========: ', [$number->countryCode, $rate, $price]);
-
-            return false;
-        }
-
-        if ($price >= $smsSetting->rate_limit_price) {
-            $rate++;
-            Cache::put($rateKey, $rate, $smsSetting->rate_limit_ttl);
-        }
-
-        logger('===========Country===========: ', [$number->countryCode]);
-        logger('===========Price===========: ', [$price]);
-        logger('===========Rate limit===========: ', [$rate]);
-
-        return true;
-    }
-
-    private static function priceKey($countryCode)
-    {
-        return "twilio.price.{$countryCode}";
-    }
-
-    private static function rateKey($countryCode)
-    {
-        return "twilio.rate-limit.{$countryCode}";
-    }
 }
+

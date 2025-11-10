@@ -26,10 +26,7 @@ class DatabaseSeeder extends Seeder
         $this->call(ReasonSeeder::class);
         $this->call(AdminsTableSeeder::class);
 
-        $this->call(SmsSettingSeeder::class);
-
-//         $this->call(UsersTableSeeder::class);
-//         $this->call(GameProfilesSeeder::class);
-//         $this->call(BountySeeder::class);
+        $this->call(GameProfilesSeeder::class);
+        $this->call(BountySeeder::class);
     }
 }

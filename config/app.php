@@ -178,6 +178,7 @@ return [
         App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+        App\Providers\HubSpotServiceProvider::class,
 
         MartinLindhe\VueInternationalizationGenerator\GeneratorProvider::class,
 
@@ -199,10 +200,6 @@ return [
         App\Forums\Services\NodebbProvider::class,
 
         App\Agora\AgoraProvider::class,
-
-        App\Providers\OAuthServiceProvider::class,
-
-        Intervention\Image\ImageServiceProvider::class
     ],
 
     /*
@@ -253,6 +250,7 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
         'CreditCard' => 'Inacho\CreditCard',
+        'HubSpot' => App\Facades\HubSpotFacade::class,
         'Mattermost' => App\Facades\MattermostFacade::class,
         'FileProcessor' => App\Facades\FileProcessorFacade::class,
         'SystemNotification' => App\Facades\SystemNotificationFacade::class,
@@ -262,7 +260,6 @@ return [
         'Elasticsearch' => App\Facades\ElasticsearchFacade::class,
         'Nodebb' => App\Facades\NodebbFacade::class,
         'Agora' => App\Agora\Facade\AgoraFacade::class,
-        'Image' => Intervention\Image\Facades\Image::class
     ],
 
 ];

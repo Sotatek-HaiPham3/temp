@@ -38,7 +38,7 @@ class FirebaseService {
         return $devices;
     }
 
-    public function pushNotification($userId, $params)
+    public function pushNotifcation($userId, $params)
     {
         $optionBuilder = new OptionsBuilder();
         $optionBuilder->setTimeToLive(60 * 10); // 10 minutes

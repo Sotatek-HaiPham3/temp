@@ -28,7 +28,7 @@ class UserSettingsUpdated extends AppBroadcastEvent
         $this->userId   = $userId;
 
         $userService    = new UserService();
-        $this->data     = cloneDeep($userService->getUserSettings($userId));
+        $this->data     = $userService->getVisibleSettings($userId);
     }
 
     /**

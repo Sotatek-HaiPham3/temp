@@ -68,7 +68,7 @@ class SiteSettingController extends AppBaseController
         try {
             $data = $this->adminService->removeSocialNetwork($socialNetworkId);
             DB::commit();
-            return $this->sendResponse([]);
+            return $this->sendResponse('Ok');
         } catch (Exception $ex) {
             DB::rollBack();
             logger()->error($ex);

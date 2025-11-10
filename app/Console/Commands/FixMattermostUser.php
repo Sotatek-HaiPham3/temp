@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Jobs\CreateMattermostUserEndpoint;
 use Illuminate\Console\Command;
 use App\Jobs\BountyCheckReady;
 use App\Models\MattermostUser;
@@ -51,15 +50,36 @@ class FixMattermostUser extends Command
 
         DB::beginTransaction();
         try {
-            $dataNotExist = User::select(DB::raw("users.*"))->leftJoin('mattermost_users', 'mattermost_users.user_id', 'users.id')->whereNull('mattermost_users.user_id')->get();
-            foreach ($dataNotExist as $user) {
-                CreateMattermostUserEndpoint::dispatchNow($user);
-            }
+            $this->getUsers()
+                ->map(function ($user, $key) {
+                    $email = strtolower($user->email);
+                    $mattermostUser = Mattermost::getUserByEmail($email);
+
+                    if (!$mattermostUser) {
+                        logger()->info("==============[FixMattermostUser]===mattermost user isn't exists");
+                        return;
+                    }
+
+                    logger()->info('==============[FixMattermostUser]===Fixing for user: ', [
+                        'user_id' => $user->id,
+                        'mattermost_user_id' => $mattermostUser->id
+                    ]);
+                    MattermostUser::create([
+                        'user_id' => $user->id,
+                        'mattermost_user_id' => $mattermostUser->id
+                    ]);
+                });
 
             DB::commit();
         } catch (Exception $e) {
             DB::rollback();
             throw $e;
         }
+    }
+
+    private function getUsers()
+    {
+        $userIds = MattermostUser::pluck('user_id');
+        return User::whereNotIn('id', $userIds)->get();
     }
 }

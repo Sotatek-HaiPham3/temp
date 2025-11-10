@@ -13,7 +13,7 @@ Route::group(['middleware' => 'auth.admin'], function () {
     Route::get('/transactions/usd-withdraw/export', 'Admin\AdminController@exportUsdTransactionsToExcel');
 
     Route::group(['prefix' => 'api'], function () {
-        Route::get('/masterdata', 'API\V1\MasterdataAPIController@getAll');
+        Route::get('/masterdata', 'API\MasterdataAPIController@getAll');
 
         Route::group(['prefix' => 'administrators'], function () {
             Route::get('/', 'Admin\AdminController@getAdministrators');
@@ -28,7 +28,7 @@ Route::group(['middleware' => 'auth.admin'], function () {
 
         Route::get('/user', 'Admin\AdminController@getCurrentAdmin');
 
-        Route::get('/users', 'API\V1\UserAPIController@users');
+        Route::get('/users', 'API\UserAPIController@users');
 
         Route::get('/users2', 'Admin\AdminController@getUsers');
 
@@ -65,9 +65,9 @@ Route::group(['middleware' => 'auth.admin'], function () {
             Route::delete('/{id}', 'SiteSettingController@removeSocialNetwork');
         });
 
-        Route::get('user/{userId}/devices', 'API\V1\UserAPIController@getDeviceRegister');
+        Route::get('user/{userId}/devices', 'API\UserAPIController@getDeviceRegister');
 
-        Route::delete('user/{userId}/device/{id}', 'API\V1\UserAPIController@deleteDevice');
+        Route::delete('user/{userId}/device/{id}', 'API\UserAPIController@deleteDevice');
 
         Route::group(['prefix' => 'setting', 'namespace' => 'Admin'], function () {
 
@@ -121,20 +121,6 @@ Route::group(['middleware' => 'auth.admin'], function () {
                 });
             });
 
-            Route::group(['prefix' => 'room'], function() {
-                Route::get('/categories', 'SettingController@getRoomCategories');
-                Route::post('/category/create', 'SettingController@createRoomCategory');
-                Route::post('/category/update', 'SettingController@updateRoomCategory');
-                Route::post('/category/delete', 'SettingController@deleteRoomCategory');
-                Route::get('/manager/role', 'SettingController@getRoomUserRole');
-                Route::post('/manager/make-role', 'SettingController@makeRoomUserRole');
-                Route::delete('/manager/remove-role', 'SettingController@removeRoomUserRole');
-            });
-
-            Route::group(['prefix' => 'sms'], function() {
-                Route::get('/', 'SettingController@getSmsSetting');
-                Route::put('/update', 'SettingController@updateSmsSetting');
-            });
         });
 
         Route::group(['prefix' => 'game', 'namespace' => 'Admin'], function() {
@@ -166,16 +152,6 @@ Route::group(['middleware' => 'auth.admin'], function () {
             Route::post('/create', 'AdminController@createUserRestrictPricing');
             Route::put('/update', 'AdminController@updateUserRestrictPricing');
             Route::delete('/delete', 'AdminController@deleteUserRestrictPricing');
-        });
-
-        Route::group(['prefix' => 'community', 'namespace' => 'Admin'], function () {
-            Route::get('/get-list-request-name-change', 'CommunityController@getListRequestNameChange');
-            Route::post('/approve-request-name-change', 'CommunityController@approveRequestNameChange');
-            Route::post('/reject-request-name-change', 'CommunityController@rejectRequestNameChange');
-            Route::get('/gallery', 'CommunityController@getListGallery');
-            Route::post('/gallery/create', 'CommunityController@createGallery');
-            Route::post('/gallery/update', 'CommunityController@updateGallery');
-            Route::delete('/gallery/delete', 'CommunityController@deleteGallery');
         });
     });
 

@@ -13,10 +13,10 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Intervention\Image\Facades\Image;
 
 class Utils
 {
+
     public static function previous24hInMillis() {
         return Carbon::now()->subDay()->timestamp * 1000;
     }
@@ -67,8 +67,7 @@ class Utils
 
         $fullFilename = str_replace(Consts::CHAR_SPACE, Consts::CHAR_HYPHEN, $fullFilename);
 
-        $resource = file_get_contents($file);
-        Storage::disk(env('FILESYSTEM_DRIVER'))->put($fullFilename, $resource);
+        Storage::disk(env('FILESYSTEM_DRIVER'))->put($fullFilename, file_get_contents($file));
         return Storage::disk(env('FILESYSTEM_DRIVER'))->url($fullFilename);
     }
 
@@ -162,7 +161,7 @@ class Utils
             return intval($item);
         })->toArray();
     }
-
+  
     public static function concealEmail($value)
     {
         $splitEmail  = explode('@', $value);
@@ -214,54 +213,5 @@ class Utils
             unset($data->$field);
         }
         return $data;
-    }
-
-    public static function generateAutoEmail()
-    {
-        return Consts::AUTO_EMAIL_CHARACTER . static::generateRandomString(Consts::AUTO_EMAIL_RANDOM_STRING_LENGTH) . Consts::AUTO_EMAIL_CHARACTER . static::generateRandomString(Consts::AUTO_EMAIL_RANDOM_STRING_LENGTH) . Consts::AUTO_EMAIL_TAG;
-    }
-
-    public static function generateAutoUsername($username)
-    {
-        return trim(substr($username, 0, 4)) . Consts::AUTO_EMAIL_CHARACTER . static::generateRandomString(Consts::AUTO_EMAIL_RANDOM_STRING_LENGTH);
-    }
-
-    public static function removeUserAutoEmail($email)
-    {
-        $randomString = strpos($email, Consts::AUTO_EMAIL_CHARACTER);
-        if (!$randomString) {
-            return $email;
-        }
-
-        $appendString = substr($email, $randomString + 1);
-        $tagString = substr($appendString, Consts::AUTO_EMAIL_RANDOM_STRING_LENGTH);
-        if ($tagString === Consts::AUTO_EMAIL_TAG) {
-            return null;
-        }
-
-        return $email;
-    }
-
-    public static function standardizedPrimaryKey($data)
-    {
-        if (!is_array($data) && !is_object($data)) {
-            return $data;
-        }
-
-        $isArrayData = is_array($data);
-        $dataArray = $isArrayData ? $data : (array)$data;
-
-        foreach ($dataArray as $key => $value) {
-            if (is_array($value) || is_object($value)) {
-                $dataArray[$key] = Utils::standardizedPrimaryKey(cloneDeep($value));
-                continue;
-            }
-
-            if ( ($key === 'id'|| str_ends_with($key, '_id')) && is_numeric($value) ) {
-                $dataArray[$key] = intval($value);
-            }
-        }
-
-        return cloneDeep($isArrayData ? $dataArray : (object)$dataArray);
     }
 }

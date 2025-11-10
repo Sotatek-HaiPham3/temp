@@ -22,10 +22,10 @@ class GameProfileDeletedUpdated extends AppBroadcastEvent
      */
     public function __construct($gameProfileId, $userId)
     {
-        $this->data = cloneDeep(array(
+        $this->data = array(
             'game_profile_id' => $gameProfileId,
             'user_id' => $userId
-        ));
+        );
     }
 
     /**

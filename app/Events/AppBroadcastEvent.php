@@ -3,7 +3,6 @@
 namespace App\Events;
 
 use App\Consts;
-use App\Utils;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Broadcasting\PrivateChannel;
@@ -33,7 +32,7 @@ class AppBroadcastEvent implements ShouldBroadcast
 
     public function broadcastWith()
     {
-        return ['data' => Utils::standardizedPrimaryKey($this->data)];
+        return ['data' => $this->data];
     }
 
     /**

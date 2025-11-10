@@ -27,9 +27,9 @@ class UserLevelUp extends AppBroadcastEvent
     public function __construct($userId, $ranking)
     {
         $this->userId   = $userId;
-        $this->data = cloneDeep([
+        $this->data = [
             'ranking' => $ranking
-        ]);
+        ];
     }
 
     /**

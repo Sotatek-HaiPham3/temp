@@ -1,5 +1,5 @@
 {
-  "name": "gamelancer-echo-hooks",
-  "script": "laravel-echo-server-hooks",
+  "name": "echo",
+  "script": "laravel-echo-server",
   "args": "start"
 }

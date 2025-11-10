@@ -170,7 +170,7 @@ return [
             'description' => 'Gamelancer Authentication.',
             'flow' => 'password', // The flow used by the OAuth2 security scheme. Valid values are "implicit", "password", "application" or "accessCode".
             'in' => 'header',
-            'tokenUrl' => config('app.url') . '/api/v1/login', // The authorization URL to be used for (password/application/accessCode)
+            'tokenUrl' => config('app.url') . '/api/login', // The authorization URL to be used for (password/application/accessCode)
             'scopes' => []
         ],
     ],

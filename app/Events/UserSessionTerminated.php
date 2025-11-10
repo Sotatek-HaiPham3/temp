@@ -23,7 +23,7 @@ class UserSessionTerminated extends AppBroadcastEvent
     public function __construct($userId, $data)
     {
         $this->userId   = $userId;
-        $this->data     = cloneDeep($data);
+        $this->data     = $data;
     }
 
     /**

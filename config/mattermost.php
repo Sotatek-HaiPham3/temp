@@ -4,7 +4,7 @@ return [
     'url' => env('MATTEERMOST_URL', 'https://mattermost-example.com'),
 
     'team' => [
-        'name' => env('MATTERMOST_TEAM_NAME', 'gamelancer'),
+        'name' => env('MATTERMOST_TEAM_NAME', 'gamelancermatching'),
 
         /*
          * Specify channel type:

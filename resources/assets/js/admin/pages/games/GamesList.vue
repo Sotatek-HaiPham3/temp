@@ -22,10 +22,9 @@
                   ref="datatable"
                   @DataTable:finish="onDatatableFinish">
         <th class="col0 text-left">No.</th>
-        <th class="col0 text-center">Id</th>
         <th class="col1 text-center" data-sort-field="title">{{ $t('game.name') }}</th>
         <th class="col2 text-center">Logo</th>
-        <th class="col3 text-center">Heading Background</th>
+        <th class="col3 text-center">{{ $t('game.thumbnail') }}</th>
         <th class="col0 text-center">{{ $t('game.order') }}</th>
         <th class="col5 text-center">Status</th>
         <th class="col6 text-center">{{ $t('game.action') }}</th>
@@ -34,9 +33,6 @@
           <tr>
             <td class="col0 text-left">
               {{ props.realIndex }}
-            </td>
-            <td class="col1 text-center">
-              {{ props.item.id }}
             </td>
             <td class="col1 text-center">
               {{ props.item.title }}
@@ -62,7 +58,7 @@
         </template>
       </data-table>
     </div>
-  </div>
+  </div> 
 </template>
 <script>
   import rf from '../../lib/RequestFactory';
@@ -210,7 +206,7 @@
         display: block;
         font-weight: normal;
       }
-    }
+    } 
   }
 }
 #games_setting {
@@ -230,7 +226,7 @@
     }
     thead {
       th {
-        padding: 5px 0px 5px 10px;
+        padding: 5px 0px 5px 10px; 
       }
     }
     td {
@@ -249,7 +245,7 @@
         }
       }
       tr {
-        .btn_edit_user:active,.btn_edit_user:hover,
+        .btn_edit_user:active,.btn_edit_user:hover, 
         .btn_save_user:active, .btn_save_user:hover {
           background-color: $color_eden;
           color: $color_white;

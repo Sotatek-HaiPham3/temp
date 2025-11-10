@@ -16,8 +16,6 @@ class SystemNotification extends Model
     const TYPE_SESSION              = 'session';
     const TYPE_VIDEO                = 'video';
     const TYPE_TASKING              = 'tasking';
-    const TYPE_ROOM                 = 'room';
-    const TYPE_COMMUNITY            = 'community';
 
     protected $fillable = [
         'type',

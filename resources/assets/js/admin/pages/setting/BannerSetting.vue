@@ -105,8 +105,8 @@
               {{ errors.first('btn_caption') }}
             </span>
           </div>
-        </div>
 
+        </div>
         <div class="datatable">
           <data-table :getData="getData"
                       :limit="limit"
