@@ -7,6 +7,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\URL;
 use App\Http\Services\MasterdataService;
 use App\Models\User;
 use App\Models\Admin;
@@ -45,6 +46,13 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         Schema::defaultStringLength(191);
+
+        // Force HTTPS scheme for URL generation when APP_URL uses https
+        $appUrlScheme = parse_url(config('app.url'), PHP_URL_SCHEME);
+        if ($appUrlScheme === 'https') {
+            URL::forceScheme('https');
+        }
+
         Validator::extend('unique_email', function($attribute, $value, $parameters, $validator) {
             $user = User::where('email', $value)->first();
             return !$user;
